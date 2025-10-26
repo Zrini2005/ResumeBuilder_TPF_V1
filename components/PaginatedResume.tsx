@@ -4,12 +4,12 @@ import type { ResumeData } from '../types';
 
 const PAGE_HEIGHT_PX = 1123; 
 
-// FIX: Define the missing 'PaginatedResumeProps' interface.
 interface PaginatedResumeProps {
   resumeData: ResumeData;
+  onPhotoUploadClick: () => void;
 }
 
-const PaginatedResume: React.FC<PaginatedResumeProps> = ({ resumeData }) => {
+const PaginatedResume: React.FC<PaginatedResumeProps> = ({ resumeData, onPhotoUploadClick }) => {
   const sourceRef = useRef<HTMLDivElement>(null);
   const [pages, setPages] = useState<string[]>([]);
   const [headerHtml, setHeaderHtml] = useState('');
@@ -25,10 +25,6 @@ const PaginatedResume: React.FC<PaginatedResumeProps> = ({ resumeData }) => {
       const main = sourceDoc.querySelector('main');
       const mainHr = sourceDoc.querySelector('header + hr');
       
-      // Note: The footerHr is no longer present, so the query will be null.
-      // The getElementHeight function handles null gracefully, returning 0.
-      const footerHr = sourceDoc.querySelector('main + hr');
-
       if (!header || !footer || !main || !mainHr) return;
 
       setHeaderHtml(header.outerHTML);
@@ -47,7 +43,7 @@ const PaginatedResume: React.FC<PaginatedResumeProps> = ({ resumeData }) => {
       const mainPaddingTop = parseInt(mainStyle.paddingTop, 10);
 
       const headerSectionHeight = getElementHeight(header) + getElementHeight(mainHr);
-      const footerSectionHeight = getElementHeight(footerHr) + getElementHeight(footer);
+      const footerSectionHeight = getElementHeight(footer);
 
       const firstPagePaddingY = 64 + 16; // pt-16 + pb-4
       const subsequentPagePaddingY = 40 + 16; // pt-10 + pb-4
@@ -61,15 +57,16 @@ const PaginatedResume: React.FC<PaginatedResumeProps> = ({ resumeData }) => {
       let isFirstPage = true;
 
       for (const sectionNode of nodes) {
-        const isSplittable = sectionNode.dataset.splittable === 'true';
+        let availableHeight = isFirstPage ? firstPageAvailableHeight : subsequentPageAvailableHeight;
         const sectionHeight = getElementHeight(sectionNode);
-        const availableHeight = isFirstPage ? firstPageAvailableHeight : subsequentPageAvailableHeight;
 
         if (currentHeight + sectionHeight <= availableHeight) {
           currentPageHtml += sectionNode.outerHTML;
           currentHeight += sectionHeight;
           continue;
         }
+
+        const isSplittable = sectionNode.dataset.splittable === 'true';
 
         if (!isSplittable) {
           if (currentPageHtml) {
@@ -87,41 +84,44 @@ const PaginatedResume: React.FC<PaginatedResumeProps> = ({ resumeData }) => {
 
         const items = Array.from(listContainer.children) as HTMLElement[];
         const sectionHeaderHeight = getElementHeight(sectionHeader);
+        const firstItemHeight = items.length > 0 ? getElementHeight(items[0]) : 0;
+        
+        if (currentHeight > 0 && currentHeight + sectionHeaderHeight + firstItemHeight > availableHeight) {
+          pagesContent.push(currentPageHtml);
+          currentPageHtml = '';
+          currentHeight = 0;
+          isFirstPage = false;
+          availableHeight = subsequentPageAvailableHeight;
+        }
 
         const sectionOpeningTag = `<div class="${sectionNode.className}" data-splittable="true">`;
         const sectionClosingTag = '</div>';
         const listOpeningTag = `<${listContainer.tagName.toLowerCase()} class="${listContainer.className}">`;
         const listClosingTag = `</${listContainer.tagName.toLowerCase()}>`;
         
-        let pageAvailableHeight = isFirstPage ? firstPageAvailableHeight : subsequentPageAvailableHeight;
-        if (currentHeight + sectionHeaderHeight > pageAvailableHeight) {
-          if (currentPageHtml) pagesContent.push(currentPageHtml);
-          currentPageHtml = '';
-          currentHeight = 0;
-          isFirstPage = false;
-        }
-
-        currentPageHtml += sectionOpeningTag + sectionHeader.outerHTML + listOpeningTag;
+        let currentSectionHtml = sectionHeader.outerHTML;
         currentHeight += sectionHeaderHeight;
-
+        
+        let listItemsHtml = '';
         for (const item of items) {
           const itemHeight = getElementHeight(item);
-          pageAvailableHeight = isFirstPage ? firstPageAvailableHeight : subsequentPageAvailableHeight;
-
-          if (currentHeight + itemHeight > pageAvailableHeight && currentHeight > sectionHeaderHeight) {
-            currentPageHtml += listClosingTag + sectionClosingTag;
+          if (currentHeight + itemHeight > availableHeight) {
+            currentPageHtml += sectionOpeningTag + currentSectionHtml + listOpeningTag + listItemsHtml + listClosingTag + sectionClosingTag;
             pagesContent.push(currentPageHtml);
-            
+
             isFirstPage = false;
-            // Start new page without the section header
-            currentPageHtml = sectionOpeningTag + listOpeningTag + item.outerHTML;
-            currentHeight = itemHeight;
+            availableHeight = subsequentPageAvailableHeight;
+            currentPageHtml = '';
+            currentHeight = 0;
+            currentSectionHtml = '';
+            listItemsHtml = item.outerHTML;
+            currentHeight += itemHeight;
           } else {
-            currentPageHtml += item.outerHTML;
+            listItemsHtml += item.outerHTML;
             currentHeight += itemHeight;
           }
         }
-        currentPageHtml += listClosingTag + sectionClosingTag;
+        currentPageHtml += sectionOpeningTag + currentSectionHtml + listOpeningTag + listItemsHtml + listClosingTag + sectionClosingTag;
       }
 
       if (currentPageHtml) {
@@ -148,18 +148,34 @@ const PaginatedResume: React.FC<PaginatedResumeProps> = ({ resumeData }) => {
       </div>
 
       {pages.length > 0 ? pages.map((content, index) => (
-        <div 
-          key={index} 
-          className={`bg-white shadow-lg px-10 pb-4 w-[210mm] h-[297mm] flex flex-col text-black leading-relaxed ${index === 0 ? 'pt-16' : 'pt-10'}`}
-        >
+        <div key={index} className="relative">
+          <div 
+            className={`bg-white shadow-lg px-10 pb-4 w-[210mm] h-[297mm] flex flex-col text-black leading-relaxed ${index === 0 ? 'pt-16' : 'pt-10'}`}
+          >
+            {index === 0 && (
+              <>
+                <div dangerouslySetInnerHTML={{ __html: headerHtml }} />
+                <hr className="border-t-[3px] border-black my-4 -mx-10" />
+              </>
+            )}
+            <main className={`text-base flex-grow ${index === 0 ? 'pt-6' : 'pt-0'}`} dangerouslySetInnerHTML={{ __html: content }} />
+            <div dangerouslySetInnerHTML={{ __html: footerHtml }} />
+          </div>
+
           {index === 0 && (
-            <>
-              <div dangerouslySetInnerHTML={{ __html: headerHtml }} />
-              <hr className="border-t-[3px] border-black my-4 -mx-10" />
-            </>
+            <button
+              onClick={onPhotoUploadClick}
+              className="absolute top-[64px] right-[40px] h-[140px] w-[130px] bg-black bg-opacity-0 hover:bg-opacity-50 flex items-center justify-center text-white opacity-0 hover:opacity-100 transition-opacity duration-300 group cursor-pointer"
+              aria-label="Upload new photo"
+            >
+              <div className="text-center">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                </svg>
+                <span className="text-sm mt-1">Upload</span>
+              </div>
+            </button>
           )}
-          <main className={`text-base flex-grow ${index === 0 ? 'pt-6' : 'pt-0'}`} dangerouslySetInnerHTML={{ __html: content }} />
-          <div dangerouslySetInnerHTML={{ __html: footerHtml }} />
         </div>
       )) : (
         <div className="bg-white shadow-lg w-[210mm] h-[297mm] flex items-center justify-center">

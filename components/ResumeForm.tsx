@@ -1,14 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { GoogleGenAI } from "@google/genai";
+import ReactCrop, { type Crop, centerCrop, makeAspectCrop } from 'react-image-crop';
 import type { ResumeData } from '../types';
 
 interface ResumeFormProps {
   resumeData: ResumeData;
   setResumeData: React.Dispatch<React.SetStateAction<ResumeData>>;
+  photoFileInputRef: React.RefObject<HTMLInputElement>;
 }
 
-// FIX: Define a type for keys of ResumeData that correspond to array properties
-// to ensure type safety in dynamic update functions.
 type DynamicSectionKey = Exclude<keyof ResumeData, 'personalDetails'>;
 
 const FormSection: React.FC<{ title: string, children: React.ReactNode }> = ({ title, children }) => (
@@ -32,8 +32,15 @@ const TextArea: React.FC<{ label: string, value: string, name: string, rows?: nu
   </div>
 );
 
-const ResumeForm: React.FC<ResumeFormProps> = ({ resumeData, setResumeData }) => {
+const ResumeForm: React.FC<ResumeFormProps> = ({ resumeData, setResumeData, photoFileInputRef }) => {
   const [enhancingId, setEnhancingId] = useState<string | null>(null);
+  
+  // State for image cropping modal
+  const [imgSrc, setImgSrc] = useState('');
+  const [crop, setCrop] = useState<Crop>();
+  const [completedCrop, setCompletedCrop] = useState<Crop>();
+  const [isCropModalOpen, setIsCropModalOpen] = useState(false);
+  const imgRef = useRef<HTMLImageElement>(null);
 
   const handlePersonalChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -101,13 +108,92 @@ const ResumeForm: React.FC<ResumeFormProps> = ({ resumeData, setResumeData }) =>
     }));
   };
 
+  // Image crop functions
+  const onSelectFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      setCrop(undefined); // Makes crop preview update between images.
+      const reader = new FileReader();
+      reader.addEventListener('load', () => setImgSrc(reader.result?.toString() || ''));
+      reader.readAsDataURL(e.target.files[0]);
+      setIsCropModalOpen(true);
+    }
+  };
+
+  function onImageLoad(e: React.SyntheticEvent<HTMLImageElement>) {
+    imgRef.current = e.currentTarget;
+    const { width, height } = e.currentTarget;
+    const aspect = 130 / 140;
+    const crop = centerCrop(
+      makeAspectCrop({ unit: '%', width: 90 }, aspect, width, height),
+      width,
+      height
+    );
+    setCrop(crop);
+    setCompletedCrop(crop);
+  }
+
+  const handleCropImage = () => {
+    if (!completedCrop || !imgRef.current) {
+        return;
+    }
+    const image = imgRef.current;
+    const canvas = document.createElement('canvas');
+    const scaleX = image.naturalWidth / image.width;
+    const scaleY = image.naturalHeight / image.height;
+    canvas.width = completedCrop.width * scaleX;
+    canvas.height = completedCrop.height * scaleY;
+    const ctx = canvas.getContext('2d');
+
+    if (!ctx) {
+      throw new Error('No 2d context');
+    }
+
+    const pixelRatio = window.devicePixelRatio;
+    canvas.width = completedCrop.width * scaleX * pixelRatio;
+    canvas.height = completedCrop.height * scaleY * pixelRatio;
+    ctx.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
+    ctx.imageSmoothingQuality = 'high';
+
+    ctx.drawImage(
+      image,
+      completedCrop.x * scaleX,
+      completedCrop.y * scaleY,
+      completedCrop.width * scaleX,
+      completedCrop.height * scaleY,
+      0,
+      0,
+      completedCrop.width * scaleX,
+      completedCrop.height * scaleY,
+    );
+    
+    const base64Image = canvas.toDataURL('image/jpeg');
+    setResumeData(prev => ({
+        ...prev,
+        personalDetails: { ...prev.personalDetails, photo: base64Image }
+    }));
+    setIsCropModalOpen(false);
+    setImgSrc('');
+    if(photoFileInputRef.current) photoFileInputRef.current.value = "";
+  }
+
   return (
     <div className="p-4 bg-white relative">
       <h1 className="text-3xl font-bold text-center mb-8 text-gray-800">Resume Editor</h1>
 
       <FormSection title="Personal Details">
         <Input label="Full Name" name="name" value={resumeData.personalDetails.name} onChange={handlePersonalChange} />
-        <Input label="Photo URL" name="photo" value={resumeData.personalDetails.photo} onChange={handlePersonalChange} />
+        
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-gray-600 mb-1">Profile Photo</label>
+          <input type="file" accept="image/*" onChange={onSelectFile} ref={photoFileInputRef} className="hidden" />
+          <button 
+            onClick={() => photoFileInputRef.current?.click()}
+            className="w-full p-2 border border-gray-300 rounded-md hover:bg-gray-50 transition bg-white text-gray-800"
+          >
+            Upload Photo
+          </button>
+        </div>
+
         <Input label="Logo URL" name="logo" value={resumeData.personalDetails.logo} onChange={handlePersonalChange} />
         <Input label="Degree" name="degree" value={resumeData.personalDetails.degree} onChange={handlePersonalChange} />
         <Input label="Gender" name="gender" value={resumeData.personalDetails.gender} onChange={handlePersonalChange} />
@@ -116,6 +202,7 @@ const ResumeForm: React.FC<ResumeFormProps> = ({ resumeData, setResumeData }) =>
         <Input label="Contact" name="contact" value={resumeData.personalDetails.contact} onChange={handlePersonalChange} />
       </FormSection>
       
+      {/* Rest of the form sections... */}
       <FormSection title="Educational Qualification">
         {resumeData.education.map((edu, index) => (
           <div key={edu.id} className="border-b pb-4 mb-4">
@@ -156,22 +243,7 @@ const ResumeForm: React.FC<ResumeFormProps> = ({ resumeData, setResumeData }) =>
                         disabled={enhancingId === intern.id}
                         className="px-3 py-1 bg-purple-500 text-white rounded hover:bg-purple-600 disabled:bg-purple-300 flex items-center space-x-2 text-sm"
                     >
-                        {enhancingId === intern.id ? (
-                            <>
-                                <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                </svg>
-                                <span>Enhancing...</span>
-                            </>
-                        ) : (
-                            <>
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
-                                </svg>
-                                <span>Enhance with AI</span>
-                            </>
-                        )}
+                        {enhancingId === intern.id ? (<span>Enhancing...</span>) : (<span>Enhance with AI</span>)}
                     </button>
                     <button onClick={() => removeDynamicItem('internships', intern.id)} className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 text-sm">Remove</button>
                 </div>
@@ -189,27 +261,12 @@ const ResumeForm: React.FC<ResumeFormProps> = ({ resumeData, setResumeData }) =>
                 <TextArea label="Description" name="description" rows={5} value={proj.description} onChange={(e) => handleDynamicChange('projects', proj.id, e)} />
                 <p className="text-xs text-gray-500 -mt-2 mb-2 ml-1">Use &lt;b&gt;text&lt;/b&gt; to make text bold.</p>
                 <div className="flex items-center justify-between mt-2">
-                    <button
+                     <button
                         onClick={() => handleEnhanceWithAi('projects', proj.id, proj.description)}
                         disabled={enhancingId === proj.id}
                         className="px-3 py-1 bg-purple-500 text-white rounded hover:bg-purple-600 disabled:bg-purple-300 flex items-center space-x-2 text-sm"
                     >
-                        {enhancingId === proj.id ? (
-                            <>
-                                <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                </svg>
-                                <span>Enhancing...</span>
-                            </>
-                        ) : (
-                            <>
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
-                                </svg>
-                                <span>Enhance with AI</span>
-                            </>
-                        )}
+                        {enhancingId === proj.id ? (<span>Enhancing...</span>) : (<span>Enhance with AI</span>)}
                     </button>
                     <button onClick={() => removeDynamicItem('projects', proj.id)} className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 text-sm">Remove</button>
                 </div>
@@ -217,8 +274,8 @@ const ResumeForm: React.FC<ResumeFormProps> = ({ resumeData, setResumeData }) =>
         ))}
         <button onClick={() => addDynamicItem('projects', {id: crypto.randomUUID(), name: '', date: '', description: ''})} className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">Add Project</button>
        </FormSection>
-
-       <FormSection title="Technical Skills and Certifications">
+        {/* ... other sections ... */}
+        <FormSection title="Technical Skills and Certifications">
         {resumeData.skills.map((skill, index) => (
             <div key={skill.id} className="border-b pb-4 mb-4">
                 <h3 className="font-semibold text-md mb-2">Skill #{index+1}</h3>
@@ -244,22 +301,7 @@ const ResumeForm: React.FC<ResumeFormProps> = ({ resumeData, setResumeData }) =>
                         disabled={enhancingId === pos.id}
                         className="px-3 py-1 bg-purple-500 text-white rounded hover:bg-purple-600 disabled:bg-purple-300 flex items-center space-x-2 text-sm"
                     >
-                        {enhancingId === pos.id ? (
-                            <>
-                                <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                </svg>
-                                <span>Enhancing...</span>
-                            </>
-                        ) : (
-                            <>
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
-                                </svg>
-                                <span>Enhance with AI</span>
-                            </>
-                        )}
+                        {enhancingId === pos.id ? (<span>Enhancing...</span>) : (<span>Enhance with AI</span>)}
                     </button>
                     <button onClick={() => removeDynamicItem('positions', pos.id)} className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 text-sm">Remove</button>
                 </div>
@@ -280,6 +322,34 @@ const ResumeForm: React.FC<ResumeFormProps> = ({ resumeData, setResumeData }) =>
         ))}
         <button onClick={() => addDynamicItem('activities', {id: crypto.randomUUID(), title: '', description: ''})} className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">Add Activity</button>
        </FormSection>
+
+       {isCropModalOpen && (
+         <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
+            <div className="bg-white p-4 rounded-lg max-w-2xl w-full">
+              <h2 className="text-xl font-bold mb-4">Crop Your Photo</h2>
+              {imgSrc && (
+                <ReactCrop
+                  crop={crop}
+                  onChange={(_, percentCrop) => setCrop(percentCrop)}
+                  onComplete={(c) => setCompletedCrop(c)}
+                  aspect={130 / 140}
+                >
+                  <img
+                    ref={imgRef}
+                    alt="Crop me"
+                    src={imgSrc}
+                    onLoad={onImageLoad}
+                    style={{ maxHeight: '70vh' }}
+                  />
+                </ReactCrop>
+              )}
+              <div className="mt-4 flex justify-end space-x-2">
+                <button onClick={() => setIsCropModalOpen(false)} className="px-4 py-2 bg-gray-300 text-gray-800 rounded hover:bg-gray-400">Cancel</button>
+                <button onClick={handleCropImage} className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">Crop & Save</button>
+              </div>
+            </div>
+         </div>
+       )}
     </div>
   );
 };

@@ -11,13 +11,13 @@ declare const html2canvas: any;
 const initialResumeData: ResumeData = {
   personalDetails: {
     name: 'DUGGI SHANMUKHA VIHAR',
-    photo: 'https://picsum.photos/120/150',
+    photo: 'https://via.placeholder.com/130x140.png?text=Photo',
     degree: 'B.Tech - Computer Science and Engineering',
     gender: 'Male',
     dob: '06/09/2005',
     email: 'tp@nitt.edu',
     contact: '+91-431-2501081',
-    logo: 'https://picsum.photos/80/80',
+    logo: 'https://via.placeholder.com/144x144.png?text=Logo',
   },
   education: [
     { id: 'edu1', year: '2023-Present', degree: 'B.Tech- CSE', institution: 'NIT, Trichy', grade: '8.74' },
@@ -85,6 +85,12 @@ function App() {
   const [isFormVisible, setIsFormVisible] = useState(true);
   const [zoom, setZoom] = useState(1);
   const resumePdfSourceRef = useRef<HTMLDivElement>(null);
+  const photoFileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleTriggerPhotoUpload = () => {
+    photoFileInputRef.current?.click();
+  };
+
 
   const handleDownloadPdf = async () => {
     const input = resumePdfSourceRef.current;
@@ -153,7 +159,11 @@ function App() {
     <div className="flex h-screen bg-gray-200 overflow-hidden">
       <aside className={`transition-all duration-300 ease-in-out bg-white shadow-lg flex-shrink-0 relative ${isFormVisible ? 'w-full md:w-[500px]' : 'w-0'} overflow-hidden`}>
         <div className="h-screen overflow-y-auto">
-          <ResumeForm resumeData={resumeData} setResumeData={setResumeData} />
+          <ResumeForm 
+            resumeData={resumeData} 
+            setResumeData={setResumeData} 
+            photoFileInputRef={photoFileInputRef}
+          />
         </div>
       </aside>
 
@@ -172,7 +182,10 @@ function App() {
         </div>
         
         <div style={{ transform: `scale(${zoom})`, transformOrigin: 'top' }} className="transition-transform duration-200">
-           <PaginatedResume resumeData={resumeData} />
+           <PaginatedResume 
+            resumeData={resumeData} 
+            onPhotoUploadClick={handleTriggerPhotoUpload}
+          />
         </div>
         
         {/* Hidden component solely for PDF generation */}
