@@ -1,0 +1,5 @@
+{
+  "name": "Live Resume Builder",
+  "description": "A dynamic resume builder application that allows users to input their information in a form and see a live, professionally formatted preview of their resume update in real-time.",
+  "requestFramePermissions": []
+}
