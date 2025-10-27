@@ -50,9 +50,10 @@ const PaginatedResume = forwardRef<HTMLDivElement, PaginatedResumeProps>(({ resu
 
       const firstPagePaddingY = 64 + 16; // pt-16 + pb-4
       const subsequentPagePaddingY = 40 + 16; // pt-10 + pb-4
+      const safetyMargin = 10; // Safety margin for calculation inaccuracies
 
-      const firstPageAvailableHeight = PAGE_HEIGHT_PX - firstPagePaddingY - headerSectionHeight - footerSectionHeight - mainPaddingTop;
-      const subsequentPageAvailableHeight = PAGE_HEIGHT_PX - subsequentPagePaddingY - footerSectionHeight;
+      const firstPageAvailableHeight = PAGE_HEIGHT_PX - firstPagePaddingY - headerSectionHeight - footerSectionHeight - mainPaddingTop - safetyMargin;
+      const subsequentPageAvailableHeight = PAGE_HEIGHT_PX - subsequentPagePaddingY - footerSectionHeight - safetyMargin;
       
       const pagesContent: string[] = [];
       let currentPageHtml = "";

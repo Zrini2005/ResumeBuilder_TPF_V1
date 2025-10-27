@@ -9,7 +9,7 @@ declare const html2canvas: any;
 
 const initialResumeData: ResumeData = {
   personalDetails: {
-    name: 'DUGGI SHANMUKHA VIHAR',
+    name: 'JOHN DOE',
     photo: 'https://via.placeholder.com/130x140.png?text=',
     degree: 'B.Tech - Computer Science and Engineering',
     gender: 'Male',
@@ -19,27 +19,27 @@ const initialResumeData: ResumeData = {
     logo: 'https://via.placeholder.com/144x144.png?text=',
   },
   education: [
-    { id: 'edu1', year: '2023-Present', degree: 'B.Tech- CSE', institution: 'NIT, Trichy', grade: '8.74' },
-    { id: 'edu2', year: '2023', degree: 'Class XII', institution: 'FAIPS DPS, Kuwait, CBSE', grade: '97.2%' },
-    { id: 'edu3', year: '2021', degree: 'Class X', institution: 'FAIPS DPS, Kuwait, CBSE', grade: '98.8%' },
+    { id: 'edu1', year: '2023-Present', degree: 'B.Tech- CSE', institution: 'NIT, Trichy', grade: '9.2' },
+    { id: 'edu2', year: '2023', degree: 'Class XII', institution: 'Delhi Public School, R. K. Puram', grade: '97.2%' },
+    { id: 'edu3', year: '2021', degree: 'Class X', institution: 'Delhi Public School, R. K. Puram', grade: '98.8%' },
   ],
   internships: [
     {
       id: 'int1',
       title: 'Research Internship at Indian Institute of Technology Guwahati',
-      date: 'Jun 2021 - Present',
+      date: 'Jun 2025 - Aug 2025',
       description: 'Working as a research intern on the project Air to Water Generator. I simulated a model in Dymola to extract water from humid air with the purpose of satisfying water requirements in coastal regions.',
     },
     {
       id: 'int2',
       title: 'Internship at AHODS Technologies Private Limited',
-      date: 'Jun 2021 - Aug-2021',
+      date: 'Jan 2025 - Mar 2025',
       description: "Worked in the Research and Development team of AHODS Technologies on the project 'To increase hydrogen production for onboard application in vehicles' in collaboration Dr. K.K Pant of Chemical Engineering department of IIT Delhi.\nPerformed literature survey on different methods to improve hydrogen production through electrolysis and compared the different approaches based on energy requirement and sustainability to provide effective and cost-efficient solutions",
     },
   ],
   achievements: [
     { id: 'ach1', description: 'Secured <b>Rank 2</b> in Cyber Olympiad(IFCO) in the Zonal level conducted by International Olympiad Foundation in 2022.' },
-    { id: 'ach2', description: 'Secured <b>Outstanding Performer Award</b> from SIF Kuwait for Sastra Pratibha Examination.' },
+    { id: 'ach2', description: 'Won <b>1st Place</b> at Smart India Hackathon 2024.' },
     { id: 'ach3', description: '<b>IBPC Meritorious Student Award</b> in 2021 and 2023.' },
   ],
   projects: [
@@ -47,7 +47,7 @@ const initialResumeData: ResumeData = {
       id: 'proj1',
       name: 'RideNITT',
       date: 'January 2025 - March 2025',
-      description: 'Developed RideNitt, a ride sharing platform that enables students to find ride partners for convenient, cost-effective travel across Trichy. Built the frontend using React.js and Tailwind CSS reducing load times by 30%. Implemented Google OAuth2 for authentication. Integrated Leaflet.js for routing. On the backend, implemented a secure Express.js server using Prisma ORM connected to a PostgreSQL database hosted on Supabase. Implemented Google OAuth2 for authentication. Delivered a responsive, user-friendly interface and contributed heavily to the frontend of the project.',
+      description: 'Developed a ride-sharing platform for students using React.js, Tailwind CSS, and Leaflet.js for routing. Built a secure Express.js backend with Prisma and PostgreSQL, featuring Google OAuth2 for authentication. Delivered a responsive, user-friendly interface, reducing load times by 30%.',
     },
     {
       id: 'proj2',
@@ -59,7 +59,7 @@ const initialResumeData: ResumeData = {
       id: 'proj3',
       name: 'Chatty',
       date: 'June 2025',
-      description: 'Developed Chatty, a real-time chat web application that enables one-on-one messaging between registered users with support for notifications and online user status. Built the frontend using React.js, Tailwind CSS and DaisyUI, ensuring a modern and responsive UI. Implemented authentication and authorization using JWT for secure access control. The backend, built with Node.js and Express, handles user management and message routing, while MongoDB stores user and chat data. Utilized Socket.io to establish a persistent connection for real-time message exchange and online presence tracking. Managed global state efficiently using Zustand and incorporated comprehensive error handling on both client and server sides.',
+      description: 'Built a real-time chat application with one-on-one messaging, notifications, and online user status. The frontend uses React.js and Tailwind CSS. The Node.js and Express backend handles user management and messaging with a MongoDB database. Implemented secure JWT authentication and used Socket.io for real-time message exchange.',
     },
   ],
   skills: [

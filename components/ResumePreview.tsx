@@ -1,4 +1,4 @@
-import React, { forwardRef } from 'react';
+import React, { forwardRef, useLayoutEffect, useRef } from 'react';
 import type { ResumeData } from '../types';
 
 interface ResumePreviewProps {
@@ -11,28 +11,52 @@ const Section: React.FC<{ title: string, children: React.ReactNode, splittable?:
             <h2 className="text-xl font-bold pr-4 flex-shrink-0">{title}</h2>
             <div className="flex-grow border-t-[4px] border-[#C00000]"></div>
         </div>
-        {children}
+        <div>{children}</div>
     </div>
 );
 
 const ResumePreview = forwardRef<HTMLDivElement, ResumePreviewProps>(({ resumeData }, ref) => {
   const { personalDetails, education, internships, achievements, projects, skills, positions, activities } = resumeData;
+  
+  const nameRef = useRef<HTMLHeadingElement>(null);
+  const nameContainerRef = useRef<HTMLDivElement>(null);
+
+  useLayoutEffect(() => {
+    const nameEl = nameRef.current;
+    const containerEl = nameContainerRef.current;
+
+    if (nameEl && containerEl) {
+      // Reset style to default to get the natural size from CSS class
+      nameEl.style.fontSize = ''; 
+      
+      // Let the browser calculate the initial font size based on Tailwind's `text-3xl`
+      const initialFontSize = parseFloat(window.getComputedStyle(nameEl).fontSize);
+      let currentFontSize = initialFontSize;
+
+      // Check for overflow and reduce font size until it fits or hits a minimum
+      // scrollWidth is the true width of the content, clientWidth is the visible width of the container
+      while (nameEl.scrollWidth > containerEl.clientWidth && currentFontSize > 16) { // 16px is a reasonable minimum
+        currentFontSize -= 1;
+        nameEl.style.fontSize = `${currentFontSize}px`;
+      }
+    }
+  }, [personalDetails.name]); // Rerun this logic every time the name changes
+
 
   const renderHTML = (text: string) => {
-      if (!text) return '';
-      // First, replace newlines with <br />, then process <b> tags.
-      // This ensures <b> tags within a line are preserved.
-      let processedText = text.replace(/<b>/g, '<strong>').replace(/<\/b>/g, '</strong>');
-      return processedText.replace(/\n/g, '<br />');
-  }
+    if (!text) return { __html: '' };
+    let processedText = text.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>'); // Markdown-style bold
+    processedText = processedText.replace(/\n/g, '<br />'); // Newlines
+    return { __html: processedText };
+  };
 
   return (
     <div ref={ref} className="bg-white shadow-lg pt-16 px-10 pb-4 leading-relaxed w-[210mm] text-black">
-      <header className="flex items-start justify-between pb-4 text-base">
-        <div className="flex items-center">
-            {personalDetails.logo && <img src={personalDetails.logo} alt="Institute Logo" className="h-36 w-36 mr-6" />}
-            <div>
-                <h1 className="text-3xl font-bold tracking-wide">{personalDetails.name}</h1>
+      <header className="flex items-center justify-between pb-4 text-base">
+        <div className="flex items-center flex-grow min-w-0">
+            {personalDetails.logo && <img src={personalDetails.logo} alt="Institute Logo" className="h-36 w-36 mr-6 flex-shrink-0" />}
+            <div ref={nameContainerRef} className="flex-grow min-w-0">
+                <h1 ref={nameRef} className="text-3xl font-bold tracking-wide whitespace-nowrap overflow-hidden">{personalDetails.name}</h1>
                 <p>{personalDetails.degree}</p>
                 <div className="leading-normal">
                     <p>Gender: {personalDetails.gender}</p>
@@ -42,7 +66,7 @@ const ResumePreview = forwardRef<HTMLDivElement, ResumePreviewProps>(({ resumeDa
                 </div>
             </div>
         </div>
-        {personalDetails.photo && <img src={personalDetails.photo} alt="Profile" className="h-[140px] w-[130px] object-cover border-2 border-black" />}
+        {personalDetails.photo && <img src={personalDetails.photo} alt="Profile" className="h-[140px] w-[130px] object-cover border-2 border-black ml-4 flex-shrink-0" />}
       </header>
 
       <hr className="border-t-[3px] border-black my-4 -mx-10" />
@@ -79,7 +103,7 @@ const ResumePreview = forwardRef<HTMLDivElement, ResumePreviewProps>(({ resumeDa
           <Section title="Academic Achievements" splittable>
               <ul className="custom-bullet-list technical-skills-list space-y-1 text-base">
                   {achievements.map(ach => (
-                      <li key={ach.id} dangerouslySetInnerHTML={{ __html: ach.description }}></li>
+                      <li key={ach.id} dangerouslySetInnerHTML={renderHTML(ach.description)}></li>
                   ))}
               </ul>
           </Section>
@@ -94,7 +118,7 @@ const ResumePreview = forwardRef<HTMLDivElement, ResumePreviewProps>(({ resumeDa
                                 <b className="font-bold">{intern.title}</b>
                                 <p className="flex-shrink-0 ml-4 text-right">{intern.date}</p>
                             </div>
-                            <div dangerouslySetInnerHTML={{ __html: renderHTML(intern.description) }}></div>
+                            <div dangerouslySetInnerHTML={renderHTML(intern.description)}></div>
                         </li>
                     ))}
                 </ul>
@@ -110,7 +134,7 @@ const ResumePreview = forwardRef<HTMLDivElement, ResumePreviewProps>(({ resumeDa
                                 <h3 className="font-bold">{proj.name}</h3>
                                 <p className="flex-shrink-0 ml-4 text-right">{proj.date}</p>
                             </div>
-                            <div dangerouslySetInnerHTML={{ __html: renderHTML(proj.description) }}></div>
+                            <div dangerouslySetInnerHTML={renderHTML(proj.description)}></div>
                         </li>
                     ))}
                 </ul>
@@ -139,7 +163,7 @@ const ResumePreview = forwardRef<HTMLDivElement, ResumePreviewProps>(({ resumeDa
                                 <h3 className="font-bold text-base">{pos.title}</h3>
                                 <p className="flex-shrink-0 ml-4 text-right">{pos.date}</p>
                             </div>
-                            <div dangerouslySetInnerHTML={{ __html: renderHTML(pos.description) }}></div>
+                            <div dangerouslySetInnerHTML={renderHTML(pos.description)}></div>
                         </li>
                     ))}
                 </ul>
@@ -153,7 +177,7 @@ const ResumePreview = forwardRef<HTMLDivElement, ResumePreviewProps>(({ resumeDa
                         <h3 className="font-bold text-base">{act.title}</h3>
                         <ul className="custom-bullet-list technical-skills-list mt-1">
                             {act.description.split('\n').map((line, i) => (
-                               line && <li key={i} dangerouslySetInnerHTML={{ __html: line }}></li>
+                               line && <li key={i} dangerouslySetInnerHTML={renderHTML(line)}></li>
                             ))}
                         </ul>
                     </div>
