@@ -28,7 +28,7 @@ const ResumePreview = forwardRef<HTMLDivElement, ResumePreviewProps>(({ resumeDa
 
   return (
     <div ref={ref} className="bg-white shadow-lg pt-16 px-10 pb-2 leading-relaxed w-[210mm] text-black" style={{ fontFamily: 'Lato, sans-serif' }}>
-      <header className="flex items-start justify-between pb-4 text-base">
+      <header className="flex items-start justify-between pb-4 text-[15px]">
         <div className="flex items-center flex-grow min-w-0">
             {personalDetails.logo && <img src={personalDetails.logo} alt="Institute Logo" className="h-36 w-36 mr-6 flex-shrink-0" />}
             <div className="flex-grow min-w-0">
@@ -47,11 +47,11 @@ const ResumePreview = forwardRef<HTMLDivElement, ResumePreviewProps>(({ resumeDa
 
       <hr className="border-t-[3px] border-black mt-4 mb-2 -mx-10" />
 
-      <main className="text-base pt-2">
+      <main className="text-[15px] pt-2">
         {education && education.length > 0 && (
           <Section title="Educational Qualification">
             <div className="mt-2">
-              <table className="w-full border-collapse border border-black text-black text-center text-base">
+              <table className="w-full border-collapse border border-black text-black text-center text-[15px]">
                 <thead>
                   <tr>
                     <th className="border border-black p-2 font-bold h-[0.5in]">Year</th>
@@ -77,7 +77,7 @@ const ResumePreview = forwardRef<HTMLDivElement, ResumePreviewProps>(({ resumeDa
 
         {achievements && achievements.length > 0 && (
           <Section title="Academic Achievements" splittable>
-              <ul className="custom-bullet-list technical-skills-list space-y-1 text-base">
+              <ul className="custom-bullet-list technical-skills-list space-y-1 text-[15px]">
                   {achievements.map(ach => (
                       <li key={ach.id} dangerouslySetInnerHTML={{ __html: ach.description }}></li>
                   ))}
@@ -87,7 +87,7 @@ const ResumePreview = forwardRef<HTMLDivElement, ResumePreviewProps>(({ resumeDa
         
         {internships && internships.length > 0 && (
             <Section title="Internship Experience" splittable>
-                <ul className="custom-bullet-list technical-skills-list space-y-4 text-base">
+                <ul className="custom-bullet-list technical-skills-list space-y-4 text-[15px]">
                     {internships.map(intern => (
                         <li key={intern.id}>
                             <div className="flex justify-between items-baseline">
@@ -103,7 +103,7 @@ const ResumePreview = forwardRef<HTMLDivElement, ResumePreviewProps>(({ resumeDa
 
         {projects && projects.length > 0 && (
             <Section title="Projects" splittable>
-                <ul className="custom-bullet-list technical-skills-list space-y-4 text-base">
+                <ul className="custom-bullet-list technical-skills-list space-y-4 text-[15px]">
                     {projects.map(proj => (
                         <li key={proj.id}>
                             <div className="flex justify-between items-baseline">
@@ -140,11 +140,11 @@ const ResumePreview = forwardRef<HTMLDivElement, ResumePreviewProps>(({ resumeDa
         
         {positions && positions.length > 0 && (
             <Section title="Positions of Responsibility" splittable>
-                <ul className="custom-bullet-list technical-skills-list space-y-4 text-base">
+                <ul className="custom-bullet-list technical-skills-list space-y-4 text-[15px]">
                     {positions.map(pos => (
                          <li key={pos.id}>
                             <div className="flex justify-between items-baseline">
-                                <h3 className="font-bold text-base">{pos.title}</h3>
+                                <h3 className="font-bold text-[15px]">{pos.title}</h3>
                                 <p className="flex-shrink-0 ml-4 text-right">{pos.date}</p>
                             </div>
                             <div dangerouslySetInnerHTML={{ __html: renderHTML(pos.description) }}></div>
@@ -159,7 +159,7 @@ const ResumePreview = forwardRef<HTMLDivElement, ResumePreviewProps>(({ resumeDa
                 {activities.map(act => (
                     act.description.trim() !== '' && (
                         <div key={act.id} className="mb-3">
-                            <h3 className="font-bold text-base">{act.title}</h3>
+                            <h3 className="font-bold text-[15px]">{act.title}</h3>
                             <ul className="custom-bullet-list technical-skills-list mt-1">
                                 {act.description.split('\n').map((line, i) => (
                                    line.trim() !== '' && <li key={i} dangerouslySetInnerHTML={{ __html: line }}></li>
