@@ -32,7 +32,7 @@ const ResumePreview = forwardRef<HTMLDivElement, ResumePreviewProps>(({ resumeDa
         <div className="flex items-center flex-grow min-w-0">
             {personalDetails.logo && <img src={personalDetails.logo} alt="Institute Logo" className="h-36 w-36 mr-6 flex-shrink-0" />}
             <div className="flex-grow min-w-0">
-                <h1 className="text-3xl font-bold tracking-wide">{personalDetails.name}</h1>
+                <h1 className="text-3xl font-bold tracking-wide break-words">{personalDetails.name}</h1>
                 <p>{personalDetails.degree}</p>
                 <div className="leading-normal">
                     <p>Gender: {personalDetails.gender}</p>
@@ -164,7 +164,7 @@ const ResumePreview = forwardRef<HTMLDivElement, ResumePreviewProps>(({ resumeDa
       </main>
       
       <footer
-        className="flex items-center justify-center text-center text-gray-500 leading-tight mt-6"
+        className="flex items-center justify-center text-center text-gray-500 leading-tight mt-2"
         style={{ fontFamily: 'Cambria, serif', fontSize: '10pt' }}
       >
         <div className="border-t border-gray-400 w-32"></div>

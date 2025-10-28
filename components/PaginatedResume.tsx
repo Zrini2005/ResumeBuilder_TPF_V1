@@ -1,4 +1,4 @@
-import React, { useState, useLayoutEffect, useRef, forwardRef } from 'react';
+import React, { useState, useLayoutEffect, useRef, forwardRef, useImperativeHandle } from 'react';
 import ResumePreview from './ResumePreview';
 import type { ResumeData } from '../types';
 
@@ -10,11 +10,20 @@ interface PaginatedResumeProps {
   onLogoUploadClick: () => void;
 }
 
-const PaginatedResume = forwardRef<HTMLDivElement, PaginatedResumeProps>(({ resumeData, onPhotoUploadClick, onLogoUploadClick }, ref) => {
+export interface PaginatedResumeHandle {
+  getHtmlForPdf: () => HTMLDivElement | null;
+}
+
+const PaginatedResume = forwardRef<PaginatedResumeHandle, PaginatedResumeProps>(({ resumeData, onPhotoUploadClick, onLogoUploadClick }, ref) => {
   const sourceRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const [pages, setPages] = useState<string[]>([]);
   const [headerHtml, setHeaderHtml] = useState('');
   const [footerHtml, setFooterHtml] = useState('');
+
+  useImperativeHandle(ref, () => ({
+    getHtmlForPdf: () => containerRef.current,
+  }));
 
   const isPlaceholder = (url: string) => url.includes('via.placeholder.com');
 
@@ -45,14 +54,13 @@ const PaginatedResume = forwardRef<HTMLDivElement, PaginatedResumeProps>(({ resu
       const mainStyle = window.getComputedStyle(main);
       const mainPaddingTop = parseInt(mainStyle.paddingTop, 10);
 
-      // A small buffer to prevent minor overflows due to calculation inaccuracies
-      const PAGINATION_OFFSET_BUFFER = 8; // Reduced from 24 to tighten up space
+      const PAGINATION_OFFSET_BUFFER = 0;
 
       const headerSectionHeight = getElementHeight(header) + getElementHeight(mainHr);
       const footerSectionHeight = getElementHeight(footer);
 
-      const firstPagePaddingY = 64 + 16; // pt-16 + pb-4
-      const subsequentPagePaddingY = 40 + 16; // pt-10 + pb-4
+      const firstPagePaddingY = 64 + 16;
+      const subsequentPagePaddingY = 40 + 16;
 
       const firstPageAvailableHeight = PAGE_HEIGHT_PX - firstPagePaddingY - headerSectionHeight - footerSectionHeight - mainPaddingTop - PAGINATION_OFFSET_BUFFER;
       const subsequentPageAvailableHeight = PAGE_HEIGHT_PX - subsequentPagePaddingY - footerSectionHeight - PAGINATION_OFFSET_BUFFER;
@@ -168,7 +176,7 @@ const PaginatedResume = forwardRef<HTMLDivElement, PaginatedResumeProps>(({ resu
   );
 
   return (
-    <div ref={ref} className="flex flex-col items-center gap-8">
+    <div ref={containerRef} className="flex flex-col items-center gap-8">
       <div className="absolute top-0 left-[-9999px] opacity-0" aria-hidden="true">
         <ResumePreview resumeData={resumeData} ref={sourceRef} />
       </div>

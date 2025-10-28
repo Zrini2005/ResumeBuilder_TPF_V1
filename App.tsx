@@ -1,6 +1,6 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import ResumeForm from './components/ResumeForm';
-import PaginatedResume from './components/PaginatedResume';
+import PaginatedResume, { PaginatedResumeHandle } from './components/PaginatedResume';
 import type { ResumeData } from './types';
 
 // Declare external libraries for TypeScript
@@ -34,7 +34,7 @@ const initialResumeData: ResumeData = {
       id: 'int2',
       title: 'Internship at AHODS Technologies Private Limited',
       date: 'Jun 2025 - Aug 2025',
-      description: "Worked in the Research and Development team of AHODS Technologies on the project 'To increase hydrogen production for onboard application in vehicles' in collaboration Dr. K.K Pant of Chemical Engineering department of IIT Delhi.\nPerformed literature survey on different methods to improve hydrogen production through electrolysis and compared the different approaches based on energy requirement and sustainability to provide effective and cost-efficient solutions",
+      description: "Collaborated with IIT Delhi on a project to enhance onboard hydrogen production for vehicles. Conducted a literature review on electrolysis methods to propose cost-effective solutions.",
     },
   ],
   achievements: [
@@ -47,7 +47,7 @@ const initialResumeData: ResumeData = {
       id: 'proj1',
       name: 'RideNITT',
       date: 'January 2025 - March 2025',
-      description: 'Developed RideNitt, a ride-sharing platform for students, using React.js, Tailwind CSS, and an Express.js backend with PostgreSQL. Features include Google OAuth2 authentication and Leaflet.js for routing, delivering a responsive user interface.',
+      description: 'Developed RideNitt, a ride-sharing platform for students, using React.js, Tailwind CSS, and an Express.js backend with PostgreSQL, featuring Google OAuth2 and Leaflet.js for routing.',
     },
     {
       id: 'proj2',
@@ -59,7 +59,7 @@ const initialResumeData: ResumeData = {
       id: 'proj3',
       name: 'Chatty',
       date: 'June 2025',
-      description: 'Built Chatty, a real-time chat application with one-on-one messaging and online status. Utilized the MERN stack with Socket.io for real-time features, JWT for security, and Zustand for state management, ensuring a modern and responsive UI.',
+      description: 'Built Chatty, a real-time chat application with one-on-one messaging and online status, using the MERN stack with Socket.io, JWT for security, and Zustand for state management.',
     },
   ],
   skills: [
@@ -83,9 +83,16 @@ function App() {
   const [resumeData, setResumeData] = useState<ResumeData>(initialResumeData);
   const [isFormVisible, setIsFormVisible] = useState(true);
   const [zoom, setZoom] = useState(1);
-  const paginatedResumeRef = useRef<HTMLDivElement>(null);
+  const [zoomInput, setZoomInput] = useState('100%');
+  const paginatedResumeRef = useRef<PaginatedResumeHandle>(null);
   const photoFileInputRef = useRef<HTMLInputElement>(null);
   const logoFileInputRef = useRef<HTMLInputElement>(null);
+  const [downloadError, setDownloadError] = useState<string | null>(null);
+  const errorTimeoutRef = useRef<number | null>(null);
+  
+  useEffect(() => {
+    setZoomInput(`${Math.round(zoom * 100)}%`);
+  }, [zoom]);
 
   const handleTriggerPhotoUpload = () => {
     photoFileInputRef.current?.click();
@@ -95,18 +102,54 @@ function App() {
     logoFileInputRef.current?.click();
   };
 
+  const isPlaceholder = (url: string) => url.includes('via.placeholder.com');
+
+  const validateImages = (): string | null => {
+    const photoIsPlaceholder = isPlaceholder(resumeData.personalDetails.photo);
+    const logoIsPlaceholder = isPlaceholder(resumeData.personalDetails.logo);
+
+    if (photoIsPlaceholder && logoIsPlaceholder) {
+      return "Please upload a profile photo and the institute logo before downloading.";
+    }
+    if (photoIsPlaceholder) {
+      return "Please upload a profile photo before downloading.";
+    }
+    if (logoIsPlaceholder) {
+      return "Please upload the institute logo before downloading.";
+    }
+    return null; // All good
+  };
+
+  const showDownloadError = (message: string) => {
+    if (errorTimeoutRef.current) {
+      clearTimeout(errorTimeoutRef.current);
+    }
+    setDownloadError(message);
+    errorTimeoutRef.current = window.setTimeout(() => {
+        setDownloadError(null);
+        errorTimeoutRef.current = null;
+    }, 4000); // 4 seconds
+  };
+
+
   const handleDownloadPdf = async () => {
-    const container = paginatedResumeRef.current;
+    const validationError = validateImages();
+    if (validationError) {
+      showDownloadError(validationError);
+      return;
+    }
+
+    const container = paginatedResumeRef.current?.getHtmlForPdf();
     if (!container) {
       console.error("Resume container not found for PDF generation.");
-      alert("Could not generate PDF. Please try again.");
+      showDownloadError("Could not generate PDF. Please try again.");
       return;
     }
 
     const pageElements = container.querySelectorAll('.resume-page-container');
     if (pageElements.length === 0) {
       console.error("No pages found to download.");
-      alert("There is no content to download as a PDF.");
+      showDownloadError("There is no content to download as a PDF.");
       return;
     }
 
@@ -145,6 +188,37 @@ function App() {
     pdf.save(`${resumeData.personalDetails.name.replace(/\s/g, '_')}_Resume.pdf`);
   };
 
+  const handleZoomInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setZoomInput(e.target.value);
+  };
+
+  const applyZoom = () => {
+    let numericValue = parseFloat(zoomInput.replace(/%/g, '').trim());
+    if (!isNaN(numericValue)) {
+      numericValue = Math.max(20, Math.min(500, numericValue)); // Clamp between 20% and 500%
+      setZoom(numericValue / 100);
+    } else {
+      // if invalid, revert input to current zoom value
+      setZoomInput(`${Math.round(zoom * 100)}%`);
+    }
+  };
+
+  const handleZoomInputBlur = () => {
+    applyZoom();
+  };
+
+  const handleZoomInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      applyZoom();
+      (e.target as HTMLInputElement).blur(); // remove focus
+    } else if (e.key === 'Escape') {
+      // revert to original value and blur
+      setZoomInput(`${Math.round(zoom * 100)}%`);
+      (e.target as HTMLInputElement).blur();
+    }
+  };
+
+
   return (
     <div className="flex h-screen bg-gray-200 overflow-hidden">
       <aside className={`transition-all duration-300 ease-in-out bg-white shadow-lg flex-shrink-0 relative ${isFormVisible ? 'w-full md:w-[500px]' : 'w-0'} overflow-hidden`}>
@@ -163,7 +237,15 @@ function App() {
             <button onClick={() => setZoom(prev => Math.max(0.2, prev - 0.1))} className="px-3 py-1 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 font-bold">-</button>
             <button onClick={() => setZoom(1)} className="px-3 py-1 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 text-sm">Reset</button>
             <button onClick={() => setZoom(prev => prev + 0.1)} className="px-3 py-1 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 font-bold">+</button>
-            <span className="text-sm text-gray-600 w-16 text-center">{Math.round(zoom * 100)}%</span>
+            <input
+              type="text"
+              value={zoomInput}
+              onChange={handleZoomInputChange}
+              onBlur={handleZoomInputBlur}
+              onKeyDown={handleZoomInputKeyDown}
+              className="text-sm text-gray-600 w-16 text-center bg-gray-50 border border-gray-300 rounded py-1 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+              aria-label="Zoom percentage"
+            />
             <button onClick={handleDownloadPdf} className="px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600 text-sm flex items-center space-x-1.5">
               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
@@ -204,6 +286,13 @@ function App() {
             <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
           </svg>
         </button>
+    )}
+
+    {/* Toast Notification */}
+    {downloadError && (
+      <div className="fixed bottom-10 left-1/2 bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 animate-fade-in">
+        {downloadError}
+      </div>
     )}
     </div>
   );
