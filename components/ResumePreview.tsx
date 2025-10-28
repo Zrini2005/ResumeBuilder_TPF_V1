@@ -91,7 +91,7 @@ const ResumePreview = forwardRef<HTMLDivElement, ResumePreviewProps>(({ resumeDa
                     {internships.map(intern => (
                         <li key={intern.id}>
                             <div className="flex justify-between items-baseline">
-                                <b className="font-bold">{intern.title}</b>
+                                <h3 className="font-bold text-[15px]">{intern.title}</h3>
                                 <p className="flex-shrink-0 ml-4 text-right">{intern.date}</p>
                             </div>
                             <div dangerouslySetInnerHTML={{ __html: renderHTML(intern.description) }}></div>
@@ -107,7 +107,7 @@ const ResumePreview = forwardRef<HTMLDivElement, ResumePreviewProps>(({ resumeDa
                     {projects.map(proj => (
                         <li key={proj.id}>
                             <div className="flex justify-between items-baseline">
-                                <h3 className="font-bold">{proj.name}</h3>
+                                <h3 className="font-bold text-[15px]">{proj.name}</h3>
                                 <p className="flex-shrink-0 ml-4 text-right">{proj.date}</p>
                             </div>
                             {proj.description.includes('\n') ? (
@@ -156,18 +156,20 @@ const ResumePreview = forwardRef<HTMLDivElement, ResumePreviewProps>(({ resumeDa
         
         {activities && activities.some(act => act.description.trim() !== '') && (
             <Section title="Extracurricular Activities" splittable>
-                {activities.map(act => (
-                    act.description.trim() !== '' && (
-                        <div key={act.id} className="mb-3">
-                            <h3 className="font-bold text-[15px]">{act.title}</h3>
-                            <ul className="custom-bullet-list technical-skills-list mt-1">
-                                {act.description.split('\n').map((line, i) => (
-                                   line.trim() !== '' && <li key={i} dangerouslySetInnerHTML={{ __html: line }}></li>
-                                ))}
-                            </ul>
-                        </div>
-                    )
-                ))}
+                <div className="space-y-3">
+                    {activities.map(act => (
+                        act.description.trim() !== '' && (
+                            <div key={act.id}>
+                                <h3 className="font-bold text-[15px]">{act.title}</h3>
+                                <ul className="custom-bullet-list technical-skills-list mt-1">
+                                    {act.description.split('\n').map((line, i) => (
+                                       line.trim() !== '' && <li key={i} dangerouslySetInnerHTML={{ __html: line }}></li>
+                                    ))}
+                                </ul>
+                            </div>
+                        )
+                    ))}
+                </div>
             </Section>
         )}
 
