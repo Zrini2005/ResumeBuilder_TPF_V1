@@ -27,12 +27,12 @@ const ResumePreview = forwardRef<HTMLDivElement, ResumePreviewProps>(({ resumeDa
   }
 
   return (
-    <div ref={ref} className="bg-white shadow-lg pt-16 px-10 pb-4 leading-relaxed w-[210mm] text-black" style={{ fontFamily: 'Lato, sans-serif' }}>
+    <div ref={ref} className="bg-white shadow-lg pt-16 px-10 pb-2 leading-relaxed w-[210mm] text-black" style={{ fontFamily: 'Lato, sans-serif' }}>
       <header className="flex items-start justify-between pb-4 text-base">
         <div className="flex items-center flex-grow min-w-0">
             {personalDetails.logo && <img src={personalDetails.logo} alt="Institute Logo" className="h-36 w-36 mr-6 flex-shrink-0" />}
             <div className="flex-grow min-w-0">
-                <h1 className="text-3xl font-bold tracking-wide break-words">{personalDetails.name}</h1>
+                <h1 className="font-bold tracking-wide break-words text-[25px] mb-1">{personalDetails.name}</h1>
                 <p>{personalDetails.degree}</p>
                 <div className="leading-normal">
                     <p>Gender: {personalDetails.gender}</p>
@@ -154,17 +154,19 @@ const ResumePreview = forwardRef<HTMLDivElement, ResumePreviewProps>(({ resumeDa
             </Section>
         )}
         
-        {activities && activities.length > 0 && (
+        {activities && activities.some(act => act.description.trim() !== '') && (
             <Section title="Extracurricular Activities" splittable>
                 {activities.map(act => (
-                    <div key={act.id} className="mb-3">
-                        <h3 className="font-bold text-base">{act.title}</h3>
-                        <ul className="custom-bullet-list technical-skills-list mt-1">
-                            {act.description.split('\n').map((line, i) => (
-                               line && <li key={i} dangerouslySetInnerHTML={{ __html: line }}></li>
-                            ))}
-                        </ul>
-                    </div>
+                    act.description.trim() !== '' && (
+                        <div key={act.id} className="mb-3">
+                            <h3 className="font-bold text-base">{act.title}</h3>
+                            <ul className="custom-bullet-list technical-skills-list mt-1">
+                                {act.description.split('\n').map((line, i) => (
+                                   line.trim() !== '' && <li key={i} dangerouslySetInnerHTML={{ __html: line }}></li>
+                                ))}
+                            </ul>
+                        </div>
+                    )
                 ))}
             </Section>
         )}
@@ -172,7 +174,7 @@ const ResumePreview = forwardRef<HTMLDivElement, ResumePreviewProps>(({ resumeDa
       </main>
       
       <footer
-        className="flex items-center justify-center text-center text-gray-500 leading-tight mt-2"
+        className="flex items-center justify-center text-center text-gray-500 leading-tight mt-1"
         style={{ fontFamily: 'Cambria, serif', fontSize: '10pt' }}
       >
         <div className="border-t border-gray-400 w-32"></div>

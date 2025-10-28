@@ -10,7 +10,7 @@ interface ResumeFormProps {
   logoFileInputRef: React.RefObject<HTMLInputElement>;
 }
 
-type DynamicSectionKey = Exclude<keyof ResumeData, 'personalDetails'>;
+type DynamicSectionKey = Exclude<keyof ResumeData, 'personalDetails' | 'activities'>;
 
 const FormSection: React.FC<{ title: string, children: React.ReactNode }> = ({ title, children }) => (
   <fieldset className="border border-gray-300 p-4 rounded-lg mb-6">
@@ -86,11 +86,11 @@ const ResumeForm: React.FC<ResumeFormProps> = ({ resumeData, setResumeData, phot
     }
   };
 
-  const handleDynamicChange = <K extends DynamicSectionKey>(section: K, id: string, e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleDynamicChange = <K extends keyof ResumeData>(section: K, id: string, e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setResumeData(prev => ({
       ...prev,
-      [section]: prev[section].map(item =>
+      [section]: (prev[section] as any[]).map(item =>
         item.id === id ? { ...item, [name]: value } : item
       )
     }));
@@ -99,14 +99,14 @@ const ResumeForm: React.FC<ResumeFormProps> = ({ resumeData, setResumeData, phot
   const addDynamicItem = <K extends DynamicSectionKey>(section: K, newItem: ResumeData[K][number]) => {
     setResumeData(prev => ({
         ...prev,
-        [section]: [...prev[section], newItem]
+        [section]: [...(prev[section] as any[]), newItem]
     }));
   };
 
   const removeDynamicItem = <K extends DynamicSectionKey>(section: K, id: string) => {
     setResumeData(prev => ({
       ...prev,
-      [section]: prev[section].filter(item => item.id !== id)
+      [section]: (prev[section] as any[]).filter(item => item.id !== id)
     }));
   };
 
@@ -328,16 +328,17 @@ const ResumeForm: React.FC<ResumeFormProps> = ({ resumeData, setResumeData, phot
        </FormSection>
        
        <FormSection title="Extracurricular Activities">
-        {resumeData.activities.map((act, index) => (
-            <div key={act.id} className="border-b pb-4 mb-4">
-                <h3 className="font-semibold text-md mb-2">Activity #{index+1}</h3>
-                <Input label="Title" name="title" value={act.title} onChange={(e) => handleDynamicChange('activities', act.id, e)} />
-                <TextArea label="Description (use newline for bullet points)" name="description" value={act.description} onChange={(e) => handleDynamicChange('activities', act.id, e)} />
-                <p className="text-xs text-gray-500 -mt-2 mb-2 ml-1">Use &lt;b&gt;text&lt;/b&gt; to make text bold.</p>
-                <button onClick={() => removeDynamicItem('activities', act.id)} className="mt-2 px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600">Remove</button>
-            </div>
+        {resumeData.activities.map((act) => (
+          <div key={act.id} className="mb-4">
+            <TextArea 
+              label={act.title}
+              name="description" 
+              value={act.description} 
+              onChange={(e) => handleDynamicChange('activities', act.id, e)} 
+            />
+            <p className="text-xs text-gray-500 -mt-2 mb-2 ml-1">Use a newline for bullet points. Use &lt;b&gt;text&lt;/b&gt; to make text bold.</p>
+          </div>
         ))}
-        <button onClick={() => addDynamicItem('activities', {id: crypto.randomUUID(), title: '', description: ''})} className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">Add Activity</button>
        </FormSection>
 
        {isCropModalOpen && (
