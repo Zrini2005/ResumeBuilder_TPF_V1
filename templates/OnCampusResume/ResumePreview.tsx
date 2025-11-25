@@ -14,8 +14,11 @@ interface SectionProps {
 const Section: React.FC<SectionProps> = ({ title, children, splittable = false }) => (
     <div className="mb-6 break-inside-avoid" data-splittable={splittable}>
         <div className="relative mb-4">
-            <div className="absolute left-0 top-1/2 transform -translate-y-1/2 w-full h-[4px]" style={{ backgroundColor: '#C00000' }}></div>
-            <h2 className="text-xl font-bold inline-block pr-4 bg-white relative z-10">
+            <div 
+                className="absolute left-0 top-1/2 w-full h-[4px] z-0" 
+                style={{ backgroundColor: '#C00000', marginTop: '-2px' }}
+            ></div>
+            <h2 className="text-xl font-bold inline-block pr-4 bg-white relative z-20">
                 {title}
             </h2>
         </div>
