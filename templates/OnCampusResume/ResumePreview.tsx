@@ -193,16 +193,22 @@ const ResumePreview = forwardRef<HTMLDivElement, ResumePreviewProps>(({ resumeDa
       </main>
       
       <footer
-        className="flex items-center justify-center text-center leading-tight mt-1"
-        style={{ fontFamily: 'Cambria, serif', fontSize: '10pt', color: '#808080' }}
+        className="flex items-center justify-center text-center w-full"
+        style={{ 
+            fontFamily: 'Cambria, serif', 
+            fontSize: '10pt', 
+            color: '#808080',
+            lineHeight: '1.2',
+            paddingBottom: '20px' 
+        }}
       >
-        <div className="border-t border-gray-400 w-32"></div>
-        <div className="px-4">
-            <p>Department of Training and Placement, NIT Trichy 620015</p>
-            <p>Telephone : +91-431-2501081 | e-mail: tp@nitt.edu,</p>
-            <p>tnp.nitt@gmail.com</p>
+        <div style={{ borderTop: '1px solid #808080', width: '130px', margin: '0 10px' }}></div>
+        <div className="px-1">
+            <p style={{ margin: 0 }}>Department of Training and Placement, NIT Trichy 620015</p>
+            <p style={{ margin: 0 }}>Telephone : +91-431-2501081 | e-mail: tp@nitt.edu,</p>
+            <p style={{ margin: 0 }}>tnp.nitt@gmail.com</p>
         </div>
-        <div className="border-t border-gray-400 w-32"></div>
+        <div style={{ borderTop: '1px solid #808080', width: '130px', margin: '0 10px' }}></div>
       </footer>
     </div>
   );
