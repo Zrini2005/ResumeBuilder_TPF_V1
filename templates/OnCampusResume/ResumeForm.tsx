@@ -246,7 +246,7 @@ const ResumeForm: React.FC<ResumeFormProps> = ({ resumeData, setResumeData, phot
   return (
     <div className="p-4 bg-white relative">
       <h1 className="text-3xl font-bold text-center mb-8 text-gray-800">Resume Editor</h1>
-
+      
       <FormSection 
         title="Personal Details" 
         defaultOpen={true}
@@ -318,7 +318,7 @@ const ResumeForm: React.FC<ResumeFormProps> = ({ resumeData, setResumeData, phot
             title="Academic Achievements"
             icon={
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
                 </svg>
             }
        >
@@ -328,7 +328,7 @@ const ResumeForm: React.FC<ResumeFormProps> = ({ resumeData, setResumeData, phot
                     Achievement
                 </h3>
                 <TextArea label="Description" name="description" value={ach.description} onChange={(e) => handleDynamicChange('achievements', ach.id, e)} />
-                <p className="text-xs text-gray-400 -mt-3 mb-3 ml-1">Use &lt;b&gt;text&lt;/b&gt; to make text bold.</p>
+                <p className="text-xs text-gray-400 -mt-2 mb-2 ml-1">Use &lt;b&gt;text&lt;/b&gt; to make text bold.</p>
                 <div className="flex justify-end">
                     <button onClick={() => removeDynamicItem('achievements', ach.id)} className="px-3 py-1.5 bg-red-500 text-white rounded-md hover:bg-red-600 text-xs font-semibold shadow-sm transition-colors">Remove Achievement</button>
                 </div>
@@ -341,7 +341,7 @@ const ResumeForm: React.FC<ResumeFormProps> = ({ resumeData, setResumeData, phot
             title="Internship Experience"
             icon={
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                 </svg>
             }
        >
@@ -353,31 +353,23 @@ const ResumeForm: React.FC<ResumeFormProps> = ({ resumeData, setResumeData, phot
                 <Input label="Title" name="title" value={intern.title} onChange={(e) => handleDynamicChange('internships', intern.id, e)} />
                 <Input label="Date" name="date" value={intern.date} onChange={(e) => handleDynamicChange('internships', intern.id, e)} />
                 <TextArea label="Description" name="description" rows={5} value={intern.description} onChange={(e) => handleDynamicChange('internships', intern.id, e)} />
-                <p className="text-xs text-gray-400 -mt-3 mb-3 ml-1">Use &lt;b&gt;text&lt;/b&gt; to make text bold.</p>
-                <div className="flex items-center justify-between mt-2">
+                <p className="text-xs text-gray-400 -mt-2 mb-2 ml-1">Use &lt;b&gt;text&lt;/b&gt; to make text bold.</p>
+                <div className="flex items-center justify-between mt-3">
                     <button
                         onClick={() => handleEnhanceWithAi('internships', intern.id, intern.description)}
                         disabled={enhancingId === intern.id}
-                        className="px-4 py-1.5 bg-gradient-to-r from-purple-500 to-indigo-600 text-white rounded-md hover:from-purple-600 hover:to-indigo-700 disabled:opacity-50 flex items-center space-x-2 text-xs font-semibold shadow-sm transition-all"
+                        className="px-3 py-1.5 bg-purple-50 text-purple-600 border border-purple-200 rounded-md hover:bg-purple-100 disabled:opacity-50 flex items-center space-x-2 text-xs font-semibold shadow-sm transition-colors"
                     >
-                        {enhancingId === intern.id ? (
-                            <>
-                                <svg className="animate-spin -ml-1 mr-2 h-3 w-3 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                </svg>
-                                <span>Enhancing...</span>
-                            </>
-                        ) : (
+                        {enhancingId === intern.id ? (<span>Enhancing...</span>) : (
                             <>
                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
-                                  <path fillRule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clipRule="evenodd" />
+                                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clipRule="evenodd" />
                                 </svg>
                                 <span>Enhance with AI</span>
                             </>
                         )}
                     </button>
-                    <button onClick={() => removeDynamicItem('internships', intern.id)} className="px-3 py-1.5 bg-red-500 text-white rounded-md hover:bg-red-600 text-xs font-semibold shadow-sm transition-colors">Remove</button>
+                    <button onClick={() => removeDynamicItem('internships', intern.id)} className="px-3 py-1.5 bg-red-500 text-white rounded-md hover:bg-red-600 text-xs font-semibold shadow-sm transition-colors">Remove Internship</button>
                 </div>
             </div>
         ))}
@@ -388,7 +380,7 @@ const ResumeForm: React.FC<ResumeFormProps> = ({ resumeData, setResumeData, phot
             title="Projects"
             icon={
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
                 </svg>
             }
        >
@@ -400,31 +392,23 @@ const ResumeForm: React.FC<ResumeFormProps> = ({ resumeData, setResumeData, phot
                 <Input label="Name" name="name" value={proj.name} onChange={(e) => handleDynamicChange('projects', proj.id, e)} />
                 <Input label="Date" name="date" value={proj.date} onChange={(e) => handleDynamicChange('projects', proj.id, e)} />
                 <TextArea label="Description" name="description" rows={5} value={proj.description} onChange={(e) => handleDynamicChange('projects', proj.id, e)} />
-                <p className="text-xs text-gray-400 -mt-3 mb-3 ml-1">Use &lt;b&gt;text&lt;/b&gt; to make text bold. Use a newline for bullet points.</p>
-                <div className="flex items-center justify-between mt-2">
+                <p className="text-xs text-gray-400 -mt-2 mb-2 ml-1">Use &lt;b&gt;text&lt;/b&gt; to make text bold. Use a newline for bullet points.</p>
+                <div className="flex items-center justify-between mt-3">
                      <button
                         onClick={() => handleEnhanceWithAi('projects', proj.id, proj.description)}
                         disabled={enhancingId === proj.id}
-                        className="px-4 py-1.5 bg-gradient-to-r from-purple-500 to-indigo-600 text-white rounded-md hover:from-purple-600 hover:to-indigo-700 disabled:opacity-50 flex items-center space-x-2 text-xs font-semibold shadow-sm transition-all"
+                        className="px-3 py-1.5 bg-purple-50 text-purple-600 border border-purple-200 rounded-md hover:bg-purple-100 disabled:opacity-50 flex items-center space-x-2 text-xs font-semibold shadow-sm transition-colors"
                     >
-                         {enhancingId === proj.id ? (
-                            <>
-                                <svg className="animate-spin -ml-1 mr-2 h-3 w-3 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                </svg>
-                                <span>Enhancing...</span>
-                            </>
-                        ) : (
+                        {enhancingId === proj.id ? (<span>Enhancing...</span>) : (
                             <>
                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
-                                  <path fillRule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clipRule="evenodd" />
+                                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clipRule="evenodd" />
                                 </svg>
                                 <span>Enhance with AI</span>
                             </>
                         )}
                     </button>
-                    <button onClick={() => removeDynamicItem('projects', proj.id)} className="px-3 py-1.5 bg-red-500 text-white rounded-md hover:bg-red-600 text-xs font-semibold shadow-sm transition-colors">Remove</button>
+                    <button onClick={() => removeDynamicItem('projects', proj.id)} className="px-3 py-1.5 bg-red-500 text-white rounded-md hover:bg-red-600 text-xs font-semibold shadow-sm transition-colors">Remove Project</button>
                 </div>
             </div>
         ))}
@@ -435,7 +419,7 @@ const ResumeForm: React.FC<ResumeFormProps> = ({ resumeData, setResumeData, phot
             title="Technical Skills and Certifications"
             icon={
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                 </svg>
             }
         >
@@ -458,7 +442,7 @@ const ResumeForm: React.FC<ResumeFormProps> = ({ resumeData, setResumeData, phot
             title="Positions of Responsibility"
             icon={
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                 </svg>
             }
        >
@@ -470,31 +454,23 @@ const ResumeForm: React.FC<ResumeFormProps> = ({ resumeData, setResumeData, phot
                 <Input label="Title" name="title" value={pos.title} onChange={(e) => handleDynamicChange('positions', pos.id, e)} />
                 <Input label="Date" name="date" value={pos.date} onChange={(e) => handleDynamicChange('positions', pos.id, e)} />
                 <TextArea label="Description" name="description" value={pos.description} onChange={(e) => handleDynamicChange('positions', pos.id, e)} />
-                <p className="text-xs text-gray-400 -mt-3 mb-3 ml-1">Use &lt;b&gt;text&lt;/b&gt; to make text bold.</p>
-                <div className="flex items-center justify-between mt-2">
+                <p className="text-xs text-gray-400 -mt-2 mb-2 ml-1">Use &lt;b&gt;text&lt;/b&gt; to make text bold.</p>
+                <div className="flex items-center justify-between mt-3">
                     <button
                         onClick={() => handleEnhanceWithAi('positions', pos.id, pos.description)}
                         disabled={enhancingId === pos.id}
-                        className="px-4 py-1.5 bg-gradient-to-r from-purple-500 to-indigo-600 text-white rounded-md hover:from-purple-600 hover:to-indigo-700 disabled:opacity-50 flex items-center space-x-2 text-xs font-semibold shadow-sm transition-all"
+                        className="px-3 py-1.5 bg-purple-50 text-purple-600 border border-purple-200 rounded-md hover:bg-purple-100 disabled:opacity-50 flex items-center space-x-2 text-xs font-semibold shadow-sm transition-colors"
                     >
-                        {enhancingId === pos.id ? (
-                            <>
-                                <svg className="animate-spin -ml-1 mr-2 h-3 w-3 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                </svg>
-                                <span>Enhancing...</span>
-                            </>
-                        ) : (
+                        {enhancingId === pos.id ? (<span>Enhancing...</span>) : (
                             <>
                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
-                                  <path fillRule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clipRule="evenodd" />
+                                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clipRule="evenodd" />
                                 </svg>
                                 <span>Enhance with AI</span>
                             </>
                         )}
                     </button>
-                    <button onClick={() => removeDynamicItem('positions', pos.id)} className="px-3 py-1.5 bg-red-500 text-white rounded-md hover:bg-red-600 text-xs font-semibold shadow-sm transition-colors">Remove</button>
+                    <button onClick={() => removeDynamicItem('positions', pos.id)} className="px-3 py-1.5 bg-red-500 text-white rounded-md hover:bg-red-600 text-xs font-semibold shadow-sm transition-colors">Remove Position</button>
                 </div>
             </div>
         ))}
@@ -505,49 +481,46 @@ const ResumeForm: React.FC<ResumeFormProps> = ({ resumeData, setResumeData, phot
             title="Extracurricular Activities"
             icon={
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                 </svg>
             }
        >
         {resumeData.activities.map((act) => (
-          <div key={act.id} className="mb-6 last:mb-0">
+          <div key={act.id} className="mb-4">
             <TextArea 
               label={act.title}
               name="description" 
               value={act.description} 
               onChange={(e) => handleDynamicChange('activities', act.id, e)} 
             />
-            <p className="text-xs text-gray-400 -mt-3 mb-3 ml-1">Use a newline for bullet points. Use &lt;b&gt;text&lt;/b&gt; to make text bold.</p>
+            <p className="text-xs text-gray-400 -mt-2 mb-2 ml-1">Use a newline for bullet points. Use &lt;b&gt;text&lt;/b&gt; to make text bold.</p>
           </div>
         ))}
        </FormSection>
 
        {isCropModalOpen && (
-         <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4">
-            <div className="bg-white p-6 rounded-2xl max-w-2xl w-full shadow-2xl">
-              <h2 className="text-2xl font-bold mb-6 text-gray-800">Crop Your Image</h2>
-              <div className="bg-gray-100 rounded-lg overflow-hidden flex items-center justify-center min-h-[300px]">
-                  {imgSrc && (
-                    <ReactCrop
-                      crop={crop}
-                      onChange={(_, percentCrop) => setCrop(percentCrop)}
-                      onComplete={(c) => setCompletedCrop(c)}
-                      aspect={editingImageFor === 'logo' ? 1 : 130 / 140}
-                      className="max-h-[60vh]"
-                    >
-                      <img
-                        ref={imgRef}
-                        alt="Crop me"
-                        src={imgSrc}
-                        onLoad={onImageLoad}
-                        style={{ maxHeight: '60vh', objectFit: 'contain' }}
-                      />
-                    </ReactCrop>
-                  )}
-              </div>
-              <div className="mt-6 flex justify-end space-x-3">
-                <button onClick={() => setIsCropModalOpen(false)} className="px-5 py-2.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 font-medium transition-colors">Cancel</button>
-                <button onClick={handleCropImage} className="px-5 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-medium shadow-md transition-all">Crop & Save</button>
+         <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
+            <div className="bg-white p-4 rounded-lg max-w-2xl w-full">
+              <h2 className="text-xl font-bold mb-4">Crop Your Image</h2>
+              {imgSrc && (
+                <ReactCrop
+                  crop={crop}
+                  onChange={(_, percentCrop) => setCrop(percentCrop)}
+                  onComplete={(c) => setCompletedCrop(c)}
+                  aspect={editingImageFor === 'logo' ? 1 : 130 / 140}
+                >
+                  <img
+                    ref={imgRef}
+                    alt="Crop me"
+                    src={imgSrc}
+                    onLoad={onImageLoad}
+                    style={{ maxHeight: '70vh' }}
+                  />
+                </ReactCrop>
+              )}
+              <div className="mt-4 flex justify-end space-x-2">
+                <button onClick={() => setIsCropModalOpen(false)} className="px-4 py-2 bg-gray-300 text-gray-800 rounded hover:bg-gray-400">Cancel</button>
+                <button onClick={handleCropImage} className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">Crop & Save</button>
               </div>
             </div>
          </div>

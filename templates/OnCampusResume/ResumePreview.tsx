@@ -11,10 +11,20 @@ interface SectionProps {
   splittable?: boolean;
 }
 
+// === CONFIGURATION ===
+// Adjust this value to change the vertical alignment of the section header 
+// relative to the maroon line. Higher values move the text higher up.
+const HEADER_BOTTOM_PADDING = '4px'; 
+
 const Section: React.FC<SectionProps> = ({ title, children, splittable = false }) => (
     <div className="mb-6 break-inside-avoid" data-splittable={splittable}>
         <div className="flex items-center mb-3">
-            <h2 className="text-xl font-bold pr-4 flex-shrink-0 pb-1">{title}</h2>
+            <h2 
+                className="text-xl font-bold pr-4 flex-shrink-0" 
+                style={{ paddingBottom: HEADER_BOTTOM_PADDING }}
+            >
+                {title}
+            </h2>
             <div className="flex-grow border-t-[4px]" style={{ borderColor: '#C00000' }}></div>
         </div>
         {children}
