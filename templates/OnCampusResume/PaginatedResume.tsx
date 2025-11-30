@@ -59,7 +59,7 @@ const PaginatedResume = forwardRef<PaginatedResumeHandle, PaginatedResumeProps>(
       const headerSectionHeight = getElementHeight(header) + getElementHeight(mainHr);
       const footerSectionHeight = getElementHeight(footer);
 
-      const firstPagePaddingY = 40 + 8; // pt-10 (top) + pb-2 (bottom)
+      const firstPagePaddingY = 64 + 8; // pt-16 (top) + pb-2 (bottom)
       const subsequentPagePaddingY = 40 + 8; // pt-10 (top) + pb-2 (bottom)
 
       const firstPageAvailableHeight = PAGE_HEIGHT_PX - firstPagePaddingY - headerSectionHeight - footerSectionHeight - mainPaddingTop - PAGINATION_OFFSET_BUFFER;
@@ -184,7 +184,7 @@ const PaginatedResume = forwardRef<PaginatedResumeHandle, PaginatedResumeProps>(
       {pages.length > 0 ? pages.map((content, index) => (
         <div key={index} className="relative">
           <div 
-            className={`resume-page-container bg-white shadow-lg px-10 pb-2 w-[210mm] h-[297mm] flex flex-col text-black leading-relaxed ${index === 0 ? 'pt-10' : 'pt-10'}`}
+            className={`resume-page-container bg-white shadow-lg px-10 pb-2 w-[210mm] h-[297mm] flex flex-col text-black leading-relaxed ${index === 0 ? 'pt-16' : 'pt-10'}`}
           >
             {index === 0 && (
               <>
@@ -200,7 +200,7 @@ const PaginatedResume = forwardRef<PaginatedResumeHandle, PaginatedResumeProps>(
             <>
               <button
                 onClick={onLogoUploadClick}
-                className={`absolute top-[40px] left-[40px] h-36 w-36 bg-black flex items-center justify-center text-white cursor-pointer group transition-opacity duration-300 
+                className={`absolute top-[64px] left-[40px] h-36 w-36 bg-black flex items-center justify-center text-white cursor-pointer group transition-opacity duration-300 
                   ${isPlaceholder(resumeData.personalDetails.logo) ? 'bg-opacity-50 opacity-100' : 'bg-opacity-40 opacity-50 group-hover:opacity-100'}`}
                 aria-label="Upload new logo"
               >
@@ -208,7 +208,7 @@ const PaginatedResume = forwardRef<PaginatedResumeHandle, PaginatedResumeProps>(
               </button>
               <button
                 onClick={onPhotoUploadClick}
-                className={`absolute top-[40px] right-[40px] h-[140px] w-[130px] bg-black flex items-center justify-center text-white cursor-pointer group transition-opacity duration-300 
+                className={`absolute top-[64px] right-[40px] h-[140px] w-[130px] bg-black flex items-center justify-center text-white cursor-pointer group transition-opacity duration-300 
                   ${isPlaceholder(resumeData.personalDetails.photo) ? 'bg-opacity-50 opacity-100' : 'bg-opacity-40 opacity-50 group-hover:opacity-100'}`}
                 aria-label="Upload new photo"
               >
