@@ -109,24 +109,8 @@ function ResumeBuilderPage({ onBack }: { onBack: () => void }) {
       return;
     }
 
-    // --- TEMPORARY STYLE INJECTION FOR PDF ---
-    // Select all section headers (H2s with specific styling classes)
-    const sectionHeaders = container.querySelectorAll('h2.text-xl.font-bold.pr-4');
-    const originalPaddings: string[] = [];
-
-    // Change padding-bottom to 18px for PDF generation
-    sectionHeaders.forEach((header) => {
-        const h = header as HTMLElement;
-        originalPaddings.push(h.style.paddingBottom);
-        h.style.paddingBottom = '18px';
-    });
-
     const pageElements = container.querySelectorAll('.resume-page-container');
     if (pageElements.length === 0) {
-      // Revert styles if we exit early
-      sectionHeaders.forEach((header, index) => {
-         (header as HTMLElement).style.paddingBottom = originalPaddings[index];
-      });
       console.error("No pages found to download.");
       showDownloadError("There is no content to download as a PDF.");
       return;
@@ -316,10 +300,6 @@ function ResumeBuilderPage({ onBack }: { onBack: () => void }) {
             showDownloadError(error.message || "An error occurred while generating the PDF.");
         }
     } finally {
-        // --- REVERT STYLE CHANGES ---
-        sectionHeaders.forEach((header, index) => {
-            (header as HTMLElement).style.paddingBottom = originalPaddings[index];
-        });
         setIsDownloading(false);
     }
   };
