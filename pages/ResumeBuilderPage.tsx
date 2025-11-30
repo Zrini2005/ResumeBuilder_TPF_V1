@@ -136,7 +136,7 @@ function ResumeBuilderPage({ onBack, initialData }: { onBack: () => void, initia
     // Since text padding pushes text UP relative to center, adding padding to line pushes border UP relative to center.
     redLines.forEach((line: any) => {
         originalLinePaddings.push(line.style.paddingTop);
-        line.style.paddingTop = '18px'; 
+        line.style.paddingTop = '26px'; 
     });
 
     try {
