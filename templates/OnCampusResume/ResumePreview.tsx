@@ -183,8 +183,8 @@ const ResumePreview = forwardRef<HTMLDivElement, ResumePreviewProps>(({ resumeDa
       </main>
       
       <footer
-        className="flex items-center justify-center text-center text-gray-500 leading-tight mt-1"
-        style={{ fontFamily: 'Cambria, serif', fontSize: '10pt' }}
+        className="flex items-center justify-center text-center leading-tight mt-1"
+        style={{ fontFamily: 'Cambria, serif', fontSize: '10pt', color: '#808080' }}
       >
         <div className="border-t border-gray-400 w-32"></div>
         <div className="px-4">
