@@ -118,27 +118,6 @@ function ResumeBuilderPage({ onBack, initialData }: { onBack: () => void, initia
 
     setIsDownloading(true);
 
-    // DIRECT DOM MANIPULATION FOR HEADER PADDING
-    // We select all section headers (h2) and forcefully set their paddingBottom to 18px
-    // This overrides the inline 4px set by React, ensuring html2canvas captures the larger gap.
-    const sectionHeaders = container.querySelectorAll('.resume-page-container h2.text-xl');
-    const redLines = container.querySelectorAll('.resume-page-container h2.text-xl + div'); // Select sibling div (red line)
-
-    const originalPaddings: string[] = [];
-    const originalLinePaddings: string[] = [];
-
-    sectionHeaders.forEach((header: any) => {
-        originalPaddings.push(header.style.paddingBottom); // Store original (likely '4px')
-        header.style.paddingBottom = '18px'; // Force PDF style
-    });
-
-    // Also apply padding-top to the red line to maintain vertical alignment in flexbox
-    // Since text padding pushes text UP relative to center, adding padding to line pushes border UP relative to center.
-    redLines.forEach((line: any) => {
-        originalLinePaddings.push(line.style.paddingTop);
-        line.style.paddingTop = '26px'; 
-    });
-
     try {
         const pdf = new jspdf.jsPDF({
           orientation: 'portrait',
@@ -152,6 +131,19 @@ function ResumeBuilderPage({ onBack, initialData }: { onBack: () => void, initia
         const styleId = 'pdf-generation-fonts';
         const existingStyle = document.getElementById(styleId);
         if (existingStyle) existingStyle.remove();
+
+        // 1. Inject Style to adjust padding-bottom of section headers to 18px temporarily
+        const paddingStyleId = 'pdf-generation-padding';
+        const paddingStyle = document.createElement('style');
+        paddingStyle.id = paddingStyleId;
+        // Target h2 elements inside the resume container that have the specific font-bold class (Section headers)
+        // Note: We use !important to override inline styles
+        paddingStyle.innerHTML = `
+            .resume-page-container h2.text-xl {
+                padding-bottom: 18px !important;
+            }
+        `;
+        document.head.appendChild(paddingStyle);
 
         if (shouldUseSystemFonts) {
              // Inject styles to force system fonts for the capture
@@ -312,27 +304,21 @@ function ResumeBuilderPage({ onBack, initialData }: { onBack: () => void, initia
 
         // Clean up injected styles
         if (style) style.remove();
+        paddingStyle.remove(); // Remove the padding override
 
         pdf.save(`${resumeData.personalDetails.name.replace(/\s/g, '_')}_Resume.pdf`);
     } catch (error: any) {
         console.error("PDF Generation failed", error);
+        
+        // Remove styling if error occurs
+        const paddingStyle = document.getElementById('pdf-generation-padding');
+        if(paddingStyle) paddingStyle.remove();
         
         // Don't show generic error if we intentionally opened the modal
         if (error.message !== "Could not download fonts. Please upload them manually.") {
             showDownloadError(error.message || "An error occurred while generating the PDF.");
         }
     } finally {
-        // REVERT DOM CHANGES
-        // Restore the headers to their original padding (likely 4px) so the screen looks correct again
-        sectionHeaders.forEach((header: any, index: number) => {
-            header.style.paddingBottom = originalPaddings[index] || '4px';
-        });
-        
-        // Restore red lines
-        redLines.forEach((line: any, index: number) => {
-            line.style.paddingTop = originalLinePaddings[index] || '';
-        });
-
         setIsDownloading(false);
     }
   };
