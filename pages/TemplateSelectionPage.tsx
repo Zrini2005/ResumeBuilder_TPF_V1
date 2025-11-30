@@ -1,6 +1,6 @@
 import React from 'react';
 
-const TemplateSelectionPage = ({ onSelect, onLogout }: { onSelect: () => void; onLogout: () => void }) => {
+const TemplateSelectionPage = ({ onSelect, onBack }: { onSelect: () => void; onBack: () => void }) => {
   return (
     <div className="relative min-h-screen bg-white overflow-hidden font-sans selection:bg-teal-100 flex flex-col">
       
@@ -14,20 +14,24 @@ const TemplateSelectionPage = ({ onSelect, onLogout }: { onSelect: () => void; o
 
       {/* Content Wrapper */}
       <div className="relative z-10 p-6 md:p-12 max-w-7xl mx-auto flex-grow w-full">
-        <div className="mb-12 flex flex-col md:flex-row justify-between items-start md:items-end">
-            <div className="text-center md:text-left">
-                <h1 className="text-4xl font-extrabold text-slate-900 mb-3 tracking-tight">Choose a Template</h1>
-                <p className="text-xl text-slate-600 max-w-2xl leading-relaxed">Select a design that best fits your profession and personality to start building.</p>
-            </div>
+        
+        {/* Back Button Row */}
+        <div className="w-full mb-8">
              <button 
-                onClick={onLogout}
-                className="mt-4 md:mt-0 flex items-center px-5 py-2.5 text-slate-600 bg-white/80 backdrop-blur-sm border border-slate-200 rounded-lg shadow-sm hover:bg-red-50 hover:text-red-600 hover:border-red-200 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 font-medium"
+                onClick={onBack}
+                className="flex items-center text-slate-500 hover:text-slate-800 transition-colors font-medium"
             >
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                 </svg>
-                Logout
+                Back
             </button>
+        </div>
+
+        {/* Centered Headings */}
+        <div className="text-center mb-16">
+            <h1 className="text-4xl font-extrabold text-slate-900 mb-4 tracking-tight">Choose a Template</h1>
+            <p className="text-xl text-slate-600 max-w-2xl mx-auto leading-relaxed">Select a design that best fits your profession and personality to start building.</p>
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">

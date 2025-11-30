@@ -14,8 +14,8 @@ interface CustomFonts {
     footer: string | null;
 }
 
-function ResumeBuilderPage({ onBack }: { onBack: () => void }) {
-  const [resumeData, setResumeData] = useState<ResumeData>(initialResumeData);
+function ResumeBuilderPage({ onBack, initialData }: { onBack: () => void, initialData: ResumeData | null }) {
+  const [resumeData, setResumeData] = useState<ResumeData>(initialData || initialResumeData);
   const [isFormVisible, setIsFormVisible] = useState(true);
   const [zoom, setZoom] = useState(1);
   const [zoomInput, setZoomInput] = useState('100%');
@@ -131,6 +131,19 @@ function ResumeBuilderPage({ onBack }: { onBack: () => void }) {
         const styleId = 'pdf-generation-fonts';
         const existingStyle = document.getElementById(styleId);
         if (existingStyle) existingStyle.remove();
+
+        // 1. Inject Style to adjust padding-bottom of section headers to 18px temporarily
+        const paddingStyleId = 'pdf-generation-padding';
+        const paddingStyle = document.createElement('style');
+        paddingStyle.id = paddingStyleId;
+        // Target h2 elements inside the resume container that have the specific font-bold class (Section headers)
+        // Note: We use !important to override inline styles
+        paddingStyle.innerHTML = `
+            .resume-page-container h2.text-xl {
+                padding-bottom: 18px !important;
+            }
+        `;
+        document.head.appendChild(paddingStyle);
 
         if (shouldUseSystemFonts) {
              // Inject styles to force system fonts for the capture
@@ -291,10 +304,16 @@ function ResumeBuilderPage({ onBack }: { onBack: () => void }) {
 
         // Clean up injected styles
         if (style) style.remove();
+        paddingStyle.remove(); // Remove the padding override
 
         pdf.save(`${resumeData.personalDetails.name.replace(/\s/g, '_')}_Resume.pdf`);
     } catch (error: any) {
         console.error("PDF Generation failed", error);
+        
+        // Remove styling if error occurs
+        const paddingStyle = document.getElementById('pdf-generation-padding');
+        if(paddingStyle) paddingStyle.remove();
+        
         // Don't show generic error if we intentionally opened the modal
         if (error.message !== "Could not download fonts. Please upload them manually.") {
             showDownloadError(error.message || "An error occurred while generating the PDF.");
@@ -353,7 +372,7 @@ function ResumeBuilderPage({ onBack }: { onBack: () => void }) {
             <button 
               onClick={onBack}
               className="h-8 px-3 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm flex items-center justify-center space-x-1.5 mr-2"
-              title="Back to Templates"
+              title="Back"
             >
                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />

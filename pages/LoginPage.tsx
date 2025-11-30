@@ -1,6 +1,6 @@
 import React from 'react';
 
-const LoginPage = ({ onLogin }: { onLogin: () => void }) => {
+const LoginPage = ({ onGetStarted }: { onGetStarted: () => void }) => {
   return (
     <div className="relative min-h-screen bg-white overflow-hidden font-sans selection:bg-teal-100 flex flex-col">
       
@@ -46,7 +46,7 @@ const LoginPage = ({ onLogin }: { onLogin: () => void }) => {
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                 <button 
-                    onClick={onLogin}
+                    onClick={onGetStarted}
                     className="px-8 py-4 bg-[#2EC4B6] hover:bg-[#25a599] text-white text-lg font-bold rounded-lg shadow-lg hover:shadow-xl transition-all transform hover:-translate-y-1 flex items-center gap-3 min-w-[200px] justify-center"
                 >
                     <span>Get Started</span>
