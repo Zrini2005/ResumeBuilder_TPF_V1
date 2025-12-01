@@ -18,7 +18,7 @@ const HEADER_BOTTOM_PADDING = '4px';
 
 const Section: React.FC<SectionProps> = ({ title, children, splittable = false }) => (
     <div className="mb-6 break-inside-avoid" data-splittable={splittable}>
-        <div className="flex items-center mb-1.5">
+        <div className="flex items-center mb-1">
             <h2 
                 className="text-xl font-bold pr-4 flex-shrink-0" 
                 style={{ paddingBottom: HEADER_BOTTOM_PADDING }}
@@ -66,7 +66,7 @@ const ResumePreview = forwardRef<HTMLDivElement, ResumePreviewProps>(({ resumeDa
       <main className="text-[15px] pt-2">
         {education && education.length > 0 && (
           <Section title="Educational Qualification">
-            <div className="mt-3">
+            <div className="mt-3.5">
               <table className="w-full border-collapse border border-black text-black text-center text-[15px]">
                 <thead>
                   <tr>
@@ -199,7 +199,7 @@ const ResumePreview = forwardRef<HTMLDivElement, ResumePreviewProps>(({ resumeDa
             fontSize: '10pt', 
             color: '#808080',
             lineHeight: '1.2',
-            paddingBottom: '20px' 
+            paddingBottom: '10px' 
         }}
       >
         <div style={{ borderTop: '1px solid #808080', width: '130px', margin: '0 10px' }}></div>
