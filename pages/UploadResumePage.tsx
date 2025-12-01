@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { GoogleGenAI } from "@google/genai";
+import { GoogleGenAI, Type } from "@google/genai";
 import { initialResumeData } from '../data/initialData';
 import type { ResumeData } from '../types';
 
@@ -57,22 +57,111 @@ const UploadResumePage: React.FC<UploadResumePageProps> = ({ onUploadComplete, o
       for (let i = 1; i <= pdf.numPages; i++) {
         const page = await pdf.getPage(i);
         const textContent = await page.getTextContent();
-        const pageText = textContent.items.map((item: any) => item.str).join(' ');
-        fullText += pageText + '\n';
+        // Improve extraction: join with newlines to preserve visual structure/lists
+        // This helps the AI distinguish between columns and list items
+        const pageText = textContent.items.map((item: any) => item.str).join('\n');
+        fullText += `--- Page ${i} ---\n${pageText}\n`;
       }
 
       const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-      const prompt = `You are a data extraction assistant. Parse the following resume text and structure it strictly according to this JSON format.
       
-      JSON Structure:
-      ${JSON.stringify(initialResumeData)}
+      const schema = {
+        type: Type.OBJECT,
+        properties: {
+          personalDetails: {
+            type: Type.OBJECT,
+            properties: {
+              name: { type: Type.STRING, nullable: true },
+              degree: { type: Type.STRING, nullable: true },
+              gender: { type: Type.STRING, nullable: true },
+              dob: { type: Type.STRING, nullable: true },
+              email: { type: Type.STRING, nullable: true },
+              contact: { type: Type.STRING, nullable: true },
+            },
+          },
+          education: {
+            type: Type.ARRAY,
+            items: {
+              type: Type.OBJECT,
+              properties: {
+                year: { type: Type.STRING, nullable: true },
+                degree: { type: Type.STRING, nullable: true },
+                institution: { type: Type.STRING, nullable: true },
+                grade: { type: Type.STRING, nullable: true },
+              },
+            },
+          },
+          internships: {
+            type: Type.ARRAY,
+            items: {
+              type: Type.OBJECT,
+              properties: {
+                title: { type: Type.STRING, nullable: true },
+                date: { type: Type.STRING, nullable: true },
+                description: { type: Type.STRING, nullable: true },
+              },
+            },
+          },
+          projects: {
+            type: Type.ARRAY,
+            items: {
+              type: Type.OBJECT,
+              properties: {
+                name: { type: Type.STRING, nullable: true },
+                date: { type: Type.STRING, nullable: true },
+                description: { type: Type.STRING, nullable: true },
+              },
+            },
+          },
+          achievements: {
+            type: Type.ARRAY,
+            items: {
+              type: Type.OBJECT,
+              properties: {
+                description: { type: Type.STRING, nullable: true },
+              },
+            },
+          },
+          skills: {
+            type: Type.ARRAY,
+            items: {
+              type: Type.OBJECT,
+              properties: {
+                category: { type: Type.STRING, nullable: true },
+                skills: { type: Type.STRING, nullable: true },
+              },
+            },
+          },
+          positions: {
+            type: Type.ARRAY,
+            items: {
+              type: Type.OBJECT,
+              properties: {
+                title: { type: Type.STRING, nullable: true },
+                date: { type: Type.STRING, nullable: true },
+                description: { type: Type.STRING, nullable: true },
+              },
+            },
+          },
+          activities: {
+            type: Type.ARRAY,
+            items: {
+              type: Type.OBJECT,
+              properties: {
+                title: { type: Type.STRING, nullable: true },
+                description: { type: Type.STRING, nullable: true },
+              },
+            },
+          },
+        },
+      };
 
-      Instructions:
-      1. Extract name, email, contact, education, experience, etc.
-      2. Map them to the corresponding fields in the JSON.
-      3. For arrays (education, internships, projects, etc.), create as many items as found in the text.
-      4. Ensure dates and descriptions are preserved.
-      5. Return ONLY the valid JSON string, no markdown formatting or backticks.
+      const prompt = `Extract data from the following resume text.
+      - Consolidate skills into categories if possible (e.g., "Languages", "Tools").
+      - For descriptions, keep them professional and concise.
+      - If a field is missing, leave it null or an empty string.
+      - Format dates as 'Month Year' or 'Year' consistently.
+      - IMPORTANT: For 'activities', you MUST return categorized items with exactly these titles: 'Social Activities', 'Cultural Activities', and 'Sports Activities'. Sort extracted activities into these categories based on their nature. If a category has no items, return an empty string for the description. Separate multiple items in a single description with a newline (\\n).
       
       Resume Text:
       ${fullText}`;
@@ -80,22 +169,66 @@ const UploadResumePage: React.FC<UploadResumePageProps> = ({ onUploadComplete, o
       const response = await ai.models.generateContent({
         model: 'gemini-2.5-flash',
         contents: prompt,
+        config: {
+            responseMimeType: 'application/json',
+            responseSchema: schema,
+        }
       });
 
-      const responseText = response.text.trim().replace(/```json/g, '').replace(/```/g, '');
-      const parsedData = JSON.parse(responseText);
+      const parsedData = JSON.parse(response.text);
 
-      // Merge with initial structure to ensure type safety
+      // Helper to safely map data and add unique IDs (which AI might skip)
+      const processList = (list: any[]) => {
+        return list?.map(item => ({
+            ...item,
+            id: crypto.randomUUID(), // Always generate a fresh ID
+            description: item.description || '', // Ensure no nulls in description
+            title: item.title || '',
+            name: item.name || '',
+            date: item.date || '',
+            institution: item.institution || '',
+            grade: item.grade || '',
+            year: item.year || '',
+            degree: item.degree || '',
+            skills: item.skills || '',
+            category: item.category || '',
+        })) || [];
+      };
+
+      // Special handling for activities to enforce the 3 categories
+      const standardizedActivities = [
+          'Social Activities',
+          'Cultural Activities',
+          'Sports Activities'
+      ].map(title => {
+          // Attempt to find exact match or close match from AI response
+          const found = parsedData.activities?.find((a: any) => a.title === title) 
+                        || parsedData.activities?.find((a: any) => a.title?.toLowerCase().includes(title.split(' ')[0].toLowerCase()));
+          
+          return {
+              id: crypto.randomUUID(),
+              title: title,
+              description: found?.description || ''
+          };
+      });
+
+      // Merge with initial structure to ensure type safety and preserve defaults like images
       const finalData: ResumeData = {
           ...initialResumeData,
-          ...parsedData,
           personalDetails: {
-              ...initialResumeData.personalDetails,
+              ...initialResumeData.personalDetails, // Keep default images
               ...parsedData.personalDetails,
-              // Keep default placeholders if extraction failed or returned empty
-              photo: parsedData.personalDetails?.photo || initialResumeData.personalDetails.photo,
-              logo: parsedData.personalDetails?.logo || initialResumeData.personalDetails.logo
-          }
+              // Restore default images if extraction didn't find any (parsedData won't have image data usually)
+              photo: initialResumeData.personalDetails.photo, 
+              logo: initialResumeData.personalDetails.logo 
+          },
+          education: processList(parsedData.education),
+          internships: processList(parsedData.internships),
+          projects: processList(parsedData.projects),
+          achievements: processList(parsedData.achievements),
+          skills: processList(parsedData.skills),
+          positions: processList(parsedData.positions),
+          activities: standardizedActivities, // Use the standardized list
       };
       
       onUploadComplete(finalData);
@@ -149,7 +282,7 @@ const UploadResumePage: React.FC<UploadResumePageProps> = ({ onUploadComplete, o
                         <div className="flex flex-col items-center py-8">
                             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600 mb-4"></div>
                             <p className="text-lg font-semibold text-slate-700">Analyzing your resume...</p>
-                            <p className="text-sm text-slate-500">This uses AI and might take a few seconds.</p>
+                            <p className="text-sm text-slate-500">Extracting structure using Gemini Flash 2.5...</p>
                         </div>
                     ) : (
                         <>
