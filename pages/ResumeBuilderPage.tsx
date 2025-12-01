@@ -118,6 +118,10 @@ function ResumeBuilderPage({ onBack, initialData }: { onBack: () => void, initia
 
     setIsDownloading(true);
 
+    // Keep track of elements we modified to revert them later
+    const modifiedElements: { element: HTMLElement, originalPadding: string }[] = [];
+    const modifiedRedLines: { element: HTMLElement, originalPadding: string }[] = [];
+
     try {
         const pdf = new jspdf.jsPDF({
           orientation: 'portrait',
@@ -132,18 +136,21 @@ function ResumeBuilderPage({ onBack, initialData }: { onBack: () => void, initia
         const existingStyle = document.getElementById(styleId);
         if (existingStyle) existingStyle.remove();
 
-        // 1. Inject Style to adjust padding-bottom of section headers to 18px temporarily
-        const paddingStyleId = 'pdf-generation-padding';
-        const paddingStyle = document.createElement('style');
-        paddingStyle.id = paddingStyleId;
-        // Target h2 elements inside the resume container that have the specific font-bold class (Section headers)
-        // Note: We use !important to override inline styles
-        paddingStyle.innerHTML = `
-            .resume-page-container h2.text-xl {
-                padding-bottom: 18px !important;
+        // 1. Direct DOM Manipulation for Padding
+        // Select all h2 section headers
+        const sectionHeaders = container.querySelectorAll('.resume-page-container h2.text-xl');
+        sectionHeaders.forEach((header) => {
+            const h2 = header as HTMLElement;
+            modifiedElements.push({ element: h2, originalPadding: h2.style.paddingBottom });
+            h2.style.paddingBottom = '18px';
+            
+            // Find the red line sibling (the div following the h2)
+            const redLine = h2.nextElementSibling as HTMLElement;
+            if (redLine && redLine.tagName === 'DIV') {
+                modifiedRedLines.push({ element: redLine, originalPadding: redLine.style.paddingTop });
+                redLine.style.paddingTop = '26px';
             }
-        `;
-        document.head.appendChild(paddingStyle);
+        });
 
         if (shouldUseSystemFonts) {
              // Inject styles to force system fonts for the capture
@@ -271,6 +278,9 @@ function ResumeBuilderPage({ onBack, initialData }: { onBack: () => void, initia
         for (let i = 0; i < pageElements.length; i++) {
           const pageElement = pageElements[i] as HTMLElement;
           
+          // CRITICAL FIX: Temporarily remove shadow to prevent overflow causing blank pages
+          pageElement.classList.remove('shadow-lg');
+
           // Temporarily hide upload buttons for clean PDF
           const uploadButtons = pageElement.parentElement?.querySelectorAll('button[aria-label^="Upload"]');
           uploadButtons?.forEach(btn => (btn as HTMLElement).style.visibility = 'hidden');
@@ -288,6 +298,7 @@ function ResumeBuilderPage({ onBack, initialData }: { onBack: () => void, initia
             y: 0,
             width: 210, // A4 width in mm
             windowWidth: 794, // 210mm @ 96 DPI
+            margin: [0, 0, 0, 0], // Explicitly zero margins
             html2canvas: {
                 scale: 0.26458, // Convert px to mm (1 px = 0.26458 mm)
                 useCORS: true,
@@ -298,21 +309,17 @@ function ResumeBuilderPage({ onBack, initialData }: { onBack: () => void, initia
             autoPaging: false // Manual paging logic used
           });
 
-          // Restore buttons
+          // Restore buttons and shadow
           uploadButtons?.forEach(btn => (btn as HTMLElement).style.visibility = 'visible');
+          pageElement.classList.add('shadow-lg');
         }
 
         // Clean up injected styles
         if (style) style.remove();
-        paddingStyle.remove(); // Remove the padding override
 
         pdf.save(`${resumeData.personalDetails.name.replace(/\s/g, '_')}_Resume.pdf`);
     } catch (error: any) {
         console.error("PDF Generation failed", error);
-        
-        // Remove styling if error occurs
-        const paddingStyle = document.getElementById('pdf-generation-padding');
-        if(paddingStyle) paddingStyle.remove();
         
         // Don't show generic error if we intentionally opened the modal
         if (error.message !== "Could not download fonts. Please upload them manually.") {
@@ -320,6 +327,13 @@ function ResumeBuilderPage({ onBack, initialData }: { onBack: () => void, initia
         }
     } finally {
         setIsDownloading(false);
+        // Revert Styles
+        modifiedElements.forEach(({ element, originalPadding }) => {
+            element.style.paddingBottom = originalPadding;
+        });
+        modifiedRedLines.forEach(({ element, originalPadding }) => {
+            element.style.paddingTop = originalPadding;
+        });
     }
   };
 
