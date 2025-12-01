@@ -306,6 +306,11 @@ function ResumeBuilderPage({ onBack, initialData }: { onBack: () => void, initia
         if (style) style.remove();
         paddingStyle.remove(); // Remove the padding override
 
+        // Remove the first page of the generated PDF before saving if there are multiple pages.
+        if (pdf.getNumberOfPages() > 1) {
+            pdf.deletePage(1);
+        }
+
         pdf.save(`${resumeData.personalDetails.name.replace(/\s/g, '_')}_Resume.pdf`);
     } catch (error: any) {
         console.error("PDF Generation failed", error);
