@@ -3,6 +3,8 @@ import type { ResumeData } from '../../types';
 
 interface ResumePreviewProps {
   resumeData: ResumeData;
+  onPhotoUploadClick?: () => void;
+  onLogoUploadClick?: () => void;
 }
 
 interface SectionProps {
@@ -31,8 +33,19 @@ const Section: React.FC<SectionProps> = ({ title, children, splittable = false }
     </div>
 );
 
-const ResumePreview = forwardRef<HTMLDivElement, ResumePreviewProps>(({ resumeData }, ref) => {
+const UploadButton = () => (
+    <div className="text-center">
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+        </svg>
+        <span className="text-sm mt-1">Upload</span>
+    </div>
+);
+
+const ResumePreview = forwardRef<HTMLDivElement, ResumePreviewProps>(({ resumeData, onPhotoUploadClick, onLogoUploadClick }, ref) => {
   const { personalDetails, education, internships, achievements, projects, skills, positions, activities } = resumeData;
+
+  const isPlaceholder = (url: string) => url.includes('via.placeholder.com');
 
   const renderHTML = (text: string) => {
       if (!text) return '';
@@ -43,7 +56,31 @@ const ResumePreview = forwardRef<HTMLDivElement, ResumePreviewProps>(({ resumeDa
   }
 
   return (
-    <div ref={ref} className="bg-white shadow-lg pt-10 px-10 pb-2 leading-relaxed w-[210mm] text-black" style={{ fontFamily: 'Lato, sans-serif' }}>
+    <div ref={ref} className="bg-white shadow-lg pt-10 px-10 pb-2 leading-relaxed w-[210mm] min-h-[297mm] text-black relative" style={{ fontFamily: 'Lato, sans-serif' }}>
+      
+      {/* Upload Buttons Overlay */}
+      {onLogoUploadClick && (
+          <button
+            onClick={onLogoUploadClick}
+            className={`absolute top-[40px] left-[40px] h-36 w-36 bg-black flex items-center justify-center text-white cursor-pointer z-10 transition-opacity duration-300 
+              ${isPlaceholder(personalDetails.logo) ? 'bg-opacity-50 opacity-100' : 'bg-opacity-0 opacity-0 hover:bg-opacity-40 hover:opacity-100'}`}
+            aria-label="Upload new logo"
+          >
+            <UploadButton />
+          </button>
+      )}
+
+      {onPhotoUploadClick && (
+        <button
+            onClick={onPhotoUploadClick}
+            className={`absolute top-[40px] right-[40px] h-[140px] w-[130px] bg-black flex items-center justify-center text-white cursor-pointer z-10 transition-opacity duration-300 
+                ${isPlaceholder(personalDetails.photo) ? 'bg-opacity-50 opacity-100' : 'bg-opacity-0 opacity-0 hover:bg-opacity-40 hover:opacity-100'}`}
+            aria-label="Upload new photo"
+        >
+            <UploadButton />
+        </button>
+      )}
+
       <header className="flex items-start justify-between pb-4 text-[15px]">
         <div className="flex items-center flex-grow min-w-0">
             {personalDetails.logo && <img src={personalDetails.logo} alt="Institute Logo" className="h-36 w-36 mr-6 flex-shrink-0" />}
@@ -193,7 +230,7 @@ const ResumePreview = forwardRef<HTMLDivElement, ResumePreviewProps>(({ resumeDa
       </main>
       
       <footer
-        className="flex items-center justify-center text-center w-full"
+        className="flex items-center justify-center text-center w-full mt-8"
         style={{ 
             fontFamily: 'Cambria, serif', 
             fontSize: '10pt', 

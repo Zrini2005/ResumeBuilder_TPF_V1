@@ -14,7 +14,7 @@ function ResumeBuilderPage({ onBack, initialData }: { onBack: () => void, initia
   const [zoom, setZoom] = useState(1);
   const [zoomInput, setZoomInput] = useState('100%');
   const [isDownloading, setIsDownloading] = useState(false);
-  const paginatedResumeRef = useRef<PaginatedResumeHandle>(null);
+  const resumePreviewRef = useRef<PaginatedResumeHandle>(null);
   const photoFileInputRef = useRef<HTMLInputElement>(null);
   const logoFileInputRef = useRef<HTMLInputElement>(null);
   const [downloadError, setDownloadError] = useState<string | null>(null);
@@ -68,17 +68,11 @@ function ResumeBuilderPage({ onBack, initialData }: { onBack: () => void, initia
       return;
     }
 
-    const container = paginatedResumeRef.current?.getHtmlForPdf();
+    // Access the container from the PaginatedResume via ref
+    const container = resumePreviewRef.current?.getHtmlForPdf();
     if (!container) {
       console.error("Resume container not found for PDF generation.");
       showDownloadError("Could not generate PDF. Please try again.");
-      return;
-    }
-
-    const pageElements = container.querySelectorAll('.resume-page-container');
-    if (pageElements.length === 0) {
-      console.error("No pages found to download.");
-      showDownloadError("There is no content to download as a PDF.");
       return;
     }
 
@@ -95,19 +89,6 @@ function ResumeBuilderPage({ onBack, initialData }: { onBack: () => void, initia
         const styleId = 'pdf-generation-fonts';
         const existingStyle = document.getElementById(styleId);
         if (existingStyle) existingStyle.remove();
-
-        // 1. Inject Style to adjust padding-bottom of section headers to 18px temporarily
-        const paddingStyleId = 'pdf-generation-padding';
-        const paddingStyle = document.createElement('style');
-        paddingStyle.id = paddingStyleId;
-        // Target h2 elements inside the resume container that have the specific font-bold class (Section headers)
-        // Note: We use !important to override inline styles
-        paddingStyle.innerHTML = `
-            .resume-page-container h2.text-xl {
-                padding-bottom: 18px !important;
-            }
-        `;
-        document.head.appendChild(paddingStyle);
 
         // Helper to fetch and convert font to base64
         const getFontBase64 = async (url: string): Promise<string> => {
@@ -206,58 +187,49 @@ function ResumeBuilderPage({ onBack, initialData }: { onBack: () => void, initia
         // Set default font for the document
         pdf.setFont('Lato', 'normal');
 
-        // Render Pages
-        for (let i = 0; i < pageElements.length; i++) {
-          const pageElement = pageElements[i] as HTMLElement;
-          
-          // Temporarily hide upload buttons for clean PDF
-          const uploadButtons = pageElement.parentElement?.querySelectorAll('button[aria-label^="Upload"]');
-          uploadButtons?.forEach(btn => (btn as HTMLElement).style.visibility = 'hidden');
+        // Get all individual page containers
+        const pages = container.querySelectorAll('.resume-page-container');
 
-          if (i > 0) {
-            pdf.addPage();
-          }
+        for (let i = 0; i < pages.length; i++) {
+            const page = pages[i] as HTMLElement;
+            
+            // Add a new page to the PDF if it's not the first one
+            if (i > 0) {
+                pdf.addPage();
+            }
 
-          // Use .html() method with specific config
-          await pdf.html(pageElement, {
-            callback: (doc: any) => {
-               // Callback required
-            },
-            x: 0,
-            y: 0,
-            width: 210, // A4 width in mm
-            windowWidth: 794, // 210mm @ 96 DPI
-            html2canvas: {
-                scale: 0.26458, // Convert px to mm (1 px = 0.26458 mm)
-                useCORS: true,
-                logging: false,
-                letterRendering: false, // Turn off for custom fonts to avoid spacing issues
-                allowTaint: true, // Allow cross-origin images if possible
-            },
-            autoPaging: false // Manual paging logic used
-          });
+            // Temporarily hide upload buttons on the specific page
+            const uploadButtons = page.querySelectorAll('button');
+            uploadButtons.forEach(btn => (btn as HTMLElement).style.visibility = 'hidden');
 
-          // Restore buttons
-          uploadButtons?.forEach(btn => (btn as HTMLElement).style.visibility = 'visible');
+            // Render the specific page
+            await pdf.html(page, {
+                callback: () => {},
+                x: 0,
+                y: 0,
+                width: 210, // A4 width in mm
+                windowWidth: 794, // 210mm @ 96 DPI
+                html2canvas: {
+                    scale: 0.26458, // Convert px to mm (1 px = 0.26458 mm)
+                    useCORS: true,
+                    logging: false,
+                    letterRendering: false,
+                    allowTaint: true,
+                }
+            });
+
+             // Restore buttons
+             uploadButtons.forEach(btn => (btn as HTMLElement).style.visibility = 'visible');
         }
+
+        // Save the PDF
+        pdf.save(`${resumeData.personalDetails.name.replace(/\s/g, '_')}_Resume.pdf`);
 
         // Clean up injected styles
         if (style) style.remove();
-        paddingStyle.remove(); // Remove the padding override
 
-        // Remove the first page of the generated PDF before saving if there are multiple pages.
-        if (pdf.getNumberOfPages() > 1) {
-            pdf.deletePage(1);
-        }
-
-        pdf.save(`${resumeData.personalDetails.name.replace(/\s/g, '_')}_Resume.pdf`);
     } catch (error: any) {
         console.error("PDF Generation failed", error);
-        
-        // Remove styling if error occurs
-        const paddingStyle = document.getElementById('pdf-generation-padding');
-        if(paddingStyle) paddingStyle.remove();
-        
         showDownloadError(error.message || "An error occurred while generating the PDF.");
     } finally {
         setIsDownloading(false);
@@ -354,7 +326,7 @@ function ResumeBuilderPage({ onBack, initialData }: { onBack: () => void, initia
         
         <div style={{ transform: `scale(${zoom})`, transformOrigin: 'top' }} className="transition-transform duration-200">
            <PaginatedResume 
-            ref={paginatedResumeRef}
+            ref={resumePreviewRef}
             resumeData={resumeData} 
             onPhotoUploadClick={handleTriggerPhotoUpload}
             onLogoUploadClick={handleTriggerLogoUpload}
