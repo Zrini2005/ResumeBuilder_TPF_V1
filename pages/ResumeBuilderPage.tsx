@@ -96,67 +96,64 @@ function ResumeBuilderPage({ onBack, initialData }: { onBack: () => void, initia
         const existingStyle = document.getElementById(styleId);
         if (existingStyle) existingStyle.remove();
 
-        // Helper to fetch and convert font to base64 safely
-        const getFontBase64 = async (url: string): Promise<string | null> => {
+        // 1. Inject Style to adjust padding-bottom of section headers temporarily
+        const paddingStyleId = 'pdf-generation-padding';
+        const paddingStyle = document.createElement('style');
+        paddingStyle.id = paddingStyleId;
+        paddingStyle.innerHTML = `
+            .resume-page-container h2.text-xl {
+                padding-bottom: 18px !important;
+            }
+        `;
+        document.head.appendChild(paddingStyle);
+
+        // Helper to fetch and convert font to base64
+        const getFontBase64 = async (url: string): Promise<string> => {
             try {
                 const response = await fetch(url);
-                const contentType = response.headers.get('content-type');
-                
-                // Validate response
-                if (!response.ok) {
-                     console.warn(`Font not found: ${url}`);
-                     return null;
-                }
-                // Check if response is HTML (common 404 behavior in SPAs)
-                if (contentType && contentType.includes('text/html')) {
-                    console.warn(`Font url returned HTML (likely 404): ${url}`);
-                    return null;
-                }
-                
+                if (!response.ok) throw new Error(`Failed to fetch font: ${url}`);
                 const blob = await response.blob();
-                if (blob.size < 100) { // Very small file, likely invalid
-                    console.warn(`Font file too small: ${url}`);
-                    return null;
-                }
-
-                return new Promise((resolve) => {
+                return new Promise((resolve, reject) => {
                     const reader = new FileReader();
                     reader.onloadend = () => {
                         const result = reader.result as string;
-                        // result is data:font/ttf;base64,.....
                         resolve(result.split(',')[1]);
                     };
-                    reader.onerror = () => {
-                        console.warn(`Error reading font blob: ${url}`);
-                        resolve(null);
-                    };
+                    reader.onerror = reject;
                     reader.readAsDataURL(blob);
                 });
             } catch (err) {
-                console.warn(`Error fetching font ${url}:`, err);
-                return null;
+                console.error(`Error fetching font ${url}:`, err);
+                throw new Error("FONT_FETCH_ERROR");
             }
         };
 
         // Fetch fonts from local /fonts directory
-        const latoRegularBase64 = await getFontBase64('/fonts/Lato-Regular.ttf');
-        const latoBoldBase64 = await getFontBase64('/fonts/Lato-Bold.ttf');
-        const cambriaBase64 = await getFontBase64('/fonts/Cambria-Regular.ttf');
-
-        const fontsLoaded = latoRegularBase64 && latoBoldBase64;
-
-        if (fontsLoaded) {
-            // 1. Add Lato to jsPDF Virtual File System (VFS)
-            pdf.addFileToVFS('Lato-Regular.ttf', latoRegularBase64);
-            pdf.addFileToVFS('Lato-Bold.ttf', latoBoldBase64);
-
-            // 2. Register Lato fonts in jsPDF
-            pdf.addFont('Lato-Regular.ttf', 'Lato', 'normal');
-            pdf.addFont('Lato-Regular.ttf', 'Lato', '400');
-            
-            pdf.addFont('Lato-Bold.ttf', 'Lato', 'bold');
-            pdf.addFont('Lato-Bold.ttf', 'Lato', '700');
+        let latoRegularBase64, latoBoldBase64, cambriaBase64;
+        
+        try {
+            latoRegularBase64 = await getFontBase64('/fonts/Lato-Regular.ttf');
+            latoBoldBase64 = await getFontBase64('/fonts/Lato-Bold.ttf');
+        } catch (error) {
+            throw new Error("Could not load Lato fonts. Please ensure 'Lato-Regular.ttf' and 'Lato-Bold.ttf' are in the 'fonts' folder.");
         }
+
+        try {
+            cambriaBase64 = await getFontBase64('/fonts/Cambria-Regular.ttf');
+        } catch (error) {
+            console.warn("Cambria font not found in /fonts/Cambria-Regular.ttf. Footer will fall back to default.");
+        }
+
+        // 1. Add Lato to jsPDF Virtual File System (VFS)
+        pdf.addFileToVFS('Lato-Regular.ttf', latoRegularBase64);
+        pdf.addFileToVFS('Lato-Bold.ttf', latoBoldBase64);
+
+        // 2. Register Lato fonts in jsPDF
+        pdf.addFont('Lato-Regular.ttf', 'Lato', 'normal');
+        pdf.addFont('Lato-Regular.ttf', 'Lato', '400');
+        
+        pdf.addFont('Lato-Bold.ttf', 'Lato', 'bold');
+        pdf.addFont('Lato-Bold.ttf', 'Lato', '700');
 
         // 3. Register Cambria if available
         if (cambriaBase64) {
@@ -166,49 +163,46 @@ function ResumeBuilderPage({ onBack, initialData }: { onBack: () => void, initia
         }
 
         // 4. Inject @font-face into DOM for html2canvas
-        // If fonts failed to load, we don't inject custom font faces to avoid confusion
-        if (fontsLoaded) {
-            style = document.createElement('style');
-            style.id = styleId;
-            style.innerHTML = `
-                @font-face {
-                    font-family: 'Lato';
-                    src: url(data:font/ttf;base64,${latoRegularBase64}) format('truetype');
-                    font-weight: normal;
-                    font-style: normal;
-                }
-                @font-face {
-                    font-family: 'Lato';
-                    src: url(data:font/ttf;base64,${latoRegularBase64}) format('truetype');
-                    font-weight: 400;
-                    font-style: normal;
-                }
-                @font-face {
-                    font-family: 'Lato';
-                    src: url(data:font/ttf;base64,${latoBoldBase64}) format('truetype');
-                    font-weight: bold;
-                    font-style: normal;
-                }
-                @font-face {
-                    font-family: 'Lato';
-                    src: url(data:font/ttf;base64,${latoBoldBase64}) format('truetype');
-                    font-weight: 700;
-                    font-style: normal;
-                }
-                ${cambriaBase64 ? `
-                @font-face {
-                    font-family: 'Cambria';
-                    src: url(data:font/ttf;base64,${cambriaBase64}) format('truetype');
-                    font-weight: normal;
-                    font-style: normal;
-                }
-                ` : ''}
-            `;
-            document.head.appendChild(style);
-            
-            // Set default font for the document if loaded
-            pdf.setFont('Lato', 'normal');
-        }
+        style = document.createElement('style');
+        style.id = styleId;
+        style.innerHTML = `
+            @font-face {
+                font-family: 'Lato';
+                src: url(data:font/ttf;base64,${latoRegularBase64}) format('truetype');
+                font-weight: normal;
+                font-style: normal;
+            }
+            @font-face {
+                font-family: 'Lato';
+                src: url(data:font/ttf;base64,${latoRegularBase64}) format('truetype');
+                font-weight: 400;
+                font-style: normal;
+            }
+            @font-face {
+                font-family: 'Lato';
+                src: url(data:font/ttf;base64,${latoBoldBase64}) format('truetype');
+                font-weight: bold;
+                font-style: normal;
+            }
+            @font-face {
+                font-family: 'Lato';
+                src: url(data:font/ttf;base64,${latoBoldBase64}) format('truetype');
+                font-weight: 700;
+                font-style: normal;
+            }
+            ${cambriaBase64 ? `
+            @font-face {
+                font-family: 'Cambria';
+                src: url(data:font/ttf;base64,${cambriaBase64}) format('truetype');
+                font-weight: normal;
+                font-style: normal;
+            }
+            ` : ''}
+        `;
+        document.head.appendChild(style);
+
+        // Set default font for the document
+        pdf.setFont('Lato', 'normal');
 
         // Render Pages
         for (let i = 0; i < pageElements.length; i++) {
@@ -247,6 +241,7 @@ function ResumeBuilderPage({ onBack, initialData }: { onBack: () => void, initia
 
         // Clean up injected styles
         if (style) style.remove();
+        paddingStyle.remove(); // Remove the padding override
 
         // Remove the first page of the generated PDF before saving if there are multiple pages.
         if (pdf.getNumberOfPages() > 1) {
@@ -256,6 +251,10 @@ function ResumeBuilderPage({ onBack, initialData }: { onBack: () => void, initia
         pdf.save(`${resumeData.personalDetails.name.replace(/\s/g, '_')}_Resume.pdf`);
     } catch (error: any) {
         console.error("PDF Generation failed", error);
+        
+        // Remove styling if error occurs
+        const paddingStyle = document.getElementById('pdf-generation-padding');
+        if(paddingStyle) paddingStyle.remove();
         
         showDownloadError(error.message || "An error occurred while generating the PDF.");
     } finally {
