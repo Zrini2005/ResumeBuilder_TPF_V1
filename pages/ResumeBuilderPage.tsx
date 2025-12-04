@@ -96,17 +96,6 @@ function ResumeBuilderPage({ onBack, initialData }: { onBack: () => void, initia
         const existingStyle = document.getElementById(styleId);
         if (existingStyle) existingStyle.remove();
 
-        // 1. Inject Style to adjust padding-bottom of section headers temporarily
-        const paddingStyleId = 'pdf-generation-padding';
-        const paddingStyle = document.createElement('style');
-        paddingStyle.id = paddingStyleId;
-        paddingStyle.innerHTML = `
-            .resume-page-container h2.text-xl {
-                padding-bottom: 18px !important;
-            }
-        `;
-        document.head.appendChild(paddingStyle);
-
         // Helper to fetch and convert font to base64
         const getFontBase64 = async (url: string): Promise<string> => {
             try {
@@ -241,7 +230,6 @@ function ResumeBuilderPage({ onBack, initialData }: { onBack: () => void, initia
 
         // Clean up injected styles
         if (style) style.remove();
-        paddingStyle.remove(); // Remove the padding override
 
         // Remove the first page of the generated PDF before saving if there are multiple pages.
         if (pdf.getNumberOfPages() > 1) {
@@ -251,10 +239,6 @@ function ResumeBuilderPage({ onBack, initialData }: { onBack: () => void, initia
         pdf.save(`${resumeData.personalDetails.name.replace(/\s/g, '_')}_Resume.pdf`);
     } catch (error: any) {
         console.error("PDF Generation failed", error);
-        
-        // Remove styling if error occurs
-        const paddingStyle = document.getElementById('pdf-generation-padding');
-        if(paddingStyle) paddingStyle.remove();
         
         showDownloadError(error.message || "An error occurred while generating the PDF.");
     } finally {
