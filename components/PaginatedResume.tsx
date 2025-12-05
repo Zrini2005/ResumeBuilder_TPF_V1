@@ -1,1 +1,0 @@
-// This file has been deprecated. Please use templates/OnCampusResume/PaginatedResume.tsx instead.
