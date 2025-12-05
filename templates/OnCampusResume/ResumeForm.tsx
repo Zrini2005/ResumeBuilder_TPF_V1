@@ -169,6 +169,14 @@ const ResumeForm: React.FC<ResumeFormProps> = ({ resumeData, setResumeData, phot
     }));
   };
 
+  const handleSetNITTLogo = () => {
+    const NITT_LOGO_URL = "/images/NITTLogo.png";
+    setResumeData(prev => ({
+        ...prev,
+        personalDetails: { ...prev.personalDetails, logo: NITT_LOGO_URL }
+    }));
+  };
+
   // Image crop functions
   const onSelectFile = (e: React.ChangeEvent<HTMLInputElement>, imageType: 'photo' | 'logo') => {
     if (e.target.files && e.target.files.length > 0) {
@@ -272,12 +280,20 @@ const ResumeForm: React.FC<ResumeFormProps> = ({ resumeData, setResumeData, phot
         <div className="mb-4">
           <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5 ml-1">Institute Logo</label>
           <input type="file" accept="image/*" onChange={(e) => onSelectFile(e, 'logo')} ref={logoFileInputRef} className="hidden" />
-          <button 
-            onClick={() => logoFileInputRef.current?.click()}
-            className="w-full px-4 py-2.5 border border-dashed border-gray-300 rounded-lg hover:bg-gray-50 hover:border-blue-300 hover:text-blue-600 transition-all bg-white text-gray-600 text-sm font-medium"
-          >
-            Upload Logo
-          </button>
+          <div className="flex gap-2">
+              <button 
+                onClick={handleSetNITTLogo}
+                className="w-1/2 px-4 py-2.5 border border-gray-300 rounded-lg hover:bg-gray-50 hover:border-blue-300 hover:text-blue-600 transition-all bg-white text-gray-600 text-sm font-medium"
+              >
+                NITT Logo
+              </button>
+              <button 
+                onClick={() => logoFileInputRef.current?.click()}
+                className="w-1/2 px-4 py-2.5 border border-dashed border-gray-300 rounded-lg hover:bg-gray-50 hover:border-blue-300 hover:text-blue-600 transition-all bg-white text-gray-600 text-sm font-medium"
+              >
+                Upload Logo
+              </button>
+          </div>
         </div>
 
         <Input label="Degree" name="degree" value={resumeData.personalDetails.degree} onChange={handlePersonalChange} />

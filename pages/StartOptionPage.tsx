@@ -55,7 +55,7 @@ const StartOptionPage: React.FC<StartOptionPageProps> = ({ onCreateNew, onUpload
                     <div className="space-y-2 mb-8 text-sm text-slate-500">
                         <div className="flex items-center">
                             <svg className="w-4 h-4 text-blue-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path></svg>
-                            8 professional templates
+                            Professional templates
                         </div>
                         <div className="flex items-center">
                             <svg className="w-4 h-4 text-blue-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
@@ -84,7 +84,7 @@ const StartOptionPage: React.FC<StartOptionPageProps> = ({ onCreateNew, onUpload
 
                     <h2 className="text-2xl font-bold text-slate-900 mb-3">Upload Existing Resume</h2>
                     <p className="text-slate-500 mb-8 leading-relaxed">
-                        Already have a resume? Upload it and we'll extract the content so you can edit and enhance it with AI.
+                        Already have a resume? Upload it and we'll extract the content so you can edit and enhance it with AI. Double check on the content once extracted!
                     </p>
 
                     <div className="space-y-2 mb-8 text-sm text-slate-500">

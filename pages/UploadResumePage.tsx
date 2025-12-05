@@ -8,13 +8,11 @@ interface UploadResumePageProps {
   onBack: () => void;
 }
 
-// Robust ID generator that works in all environments (secure/non-secure)
 const generateId = () => {
   if (typeof crypto !== 'undefined' && crypto.randomUUID) {
     try {
       return crypto.randomUUID();
     } catch (e) {
-      // Fallback if crypto.randomUUID fails (e.g. insecure context)
     }
   }
   return Date.now().toString(36) + Math.random().toString(36).substring(2);
@@ -60,7 +58,6 @@ const UploadResumePage: React.FC<UploadResumePageProps> = ({ onUploadComplete, o
     setIsProcessing(true);
 
     try {
-      // Access pdfjsLib from window explicitly to avoid TS issues or loading race conditions
       const pdfjsLib = (window as any).pdfjsLib;
       if (!pdfjsLib) {
         throw new Error("PDF processing library not loaded. Please check your internet connection.");
@@ -73,9 +70,6 @@ const UploadResumePage: React.FC<UploadResumePageProps> = ({ onUploadComplete, o
       for (let i = 1; i <= pdf.numPages; i++) {
         const page = await pdf.getPage(i);
         const textContent = await page.getTextContent();
-        
-        // Preserve structure by joining items with spaces, and using newlines for marked content or large gaps if possible.
-        // For simplicity and robustness with AI, simple newline separation often works best to denote "blocks".
         const pageText = textContent.items.map((item: any) => item.str).join('\n');
         fullText += `--- Page ${i} ---\n${pageText}\n`;
       }
@@ -98,8 +92,11 @@ const UploadResumePage: React.FC<UploadResumePageProps> = ({ onUploadComplete, o
               dob: { type: Type.STRING, nullable: true },
               email: { type: Type.STRING, nullable: true },
               contact: { type: Type.STRING, nullable: true },
+              linkedin: { type: Type.STRING, nullable: true },
+              github: { type: Type.STRING, nullable: true },
             },
           },
+          summary: { type: Type.STRING, nullable: true },
           education: {
             type: Type.ARRAY,
             items: {
@@ -153,6 +150,16 @@ const UploadResumePage: React.FC<UploadResumePageProps> = ({ onUploadComplete, o
               },
             },
           },
+          languages: {
+            type: Type.ARRAY,
+            items: {
+              type: Type.OBJECT,
+              properties: {
+                language: { type: Type.STRING, nullable: true },
+                proficiency: { type: Type.STRING, nullable: true },
+              },
+            },
+          },
           positions: {
             type: Type.ARRAY,
             items: {
@@ -174,15 +181,48 @@ const UploadResumePage: React.FC<UploadResumePageProps> = ({ onUploadComplete, o
               },
             },
           },
+          webLinks: {
+            type: Type.ARRAY,
+            items: {
+              type: Type.OBJECT,
+              properties: {
+                name: { type: Type.STRING, nullable: true },
+                url: { type: Type.STRING, nullable: true },
+              },
+            },
+          },
+          coursework: {
+            type: Type.ARRAY,
+            items: {
+              type: Type.OBJECT,
+              properties: {
+                category: { type: Type.STRING, nullable: true },
+                subjects: { type: Type.STRING, nullable: true },
+              },
+            },
+          },
+          technicalAchievements: {
+             type: Type.ARRAY,
+             items: {
+               type: Type.OBJECT,
+               properties: {
+                 year: { type: Type.STRING, nullable: true },
+                 rank: { type: Type.STRING, nullable: true },
+                 event: { type: Type.STRING, nullable: true },
+               },
+             },
+          },
         },
       };
 
       const prompt = `Extract data from the following resume text.
-      - Consolidate skills into categories if possible (e.g., "Languages", "Tools").
-      - For descriptions, keep them professional and concise.
-      - If a field is missing, leave it null or an empty string.
-      - Format dates as 'Month Year' or 'Year' consistently.
-      - IMPORTANT: For 'activities', you MUST return categorized items with exactly these titles: 'Social Activities', 'Cultural Activities', and 'Sports Activities'. Sort extracted activities into these categories based on their nature. If a category has no items, return an empty string for the description. Separate multiple items in a single description with a newline (\\n).
+      - Consolidate skills into categories if possible.
+      - Extract a professional summary if present.
+      - Extract languages known.
+      - Extract Web Links (like Codechef, Github, etc) into the webLinks array.
+      - Extract Coursework subjects categorized by degree/level if possible.
+      - Extract Technical Achievements (Year, Rank/Position, Event Name).
+      - Standardize 'activities' into: 'Social Activities', 'Cultural Activities', 'Sports Activities', 'Extracurricular Activities'.
       
       Resume Text:
       ${fullText}`;
@@ -197,13 +237,10 @@ const UploadResumePage: React.FC<UploadResumePageProps> = ({ onUploadComplete, o
       });
 
       const jsonText = response.text;
-      if (!jsonText) {
-          throw new Error("AI response was empty. Please try again.");
-      }
+      if (!jsonText) throw new Error("AI response was empty.");
 
       const parsedData = JSON.parse(jsonText);
 
-      // Helper to safely map data and add unique IDs (which AI might skip)
       const processList = (list: any[]) => {
         return list?.map(item => ({
             ...item,
@@ -218,19 +255,22 @@ const UploadResumePage: React.FC<UploadResumePageProps> = ({ onUploadComplete, o
             degree: item.degree || '',
             skills: item.skills || '',
             category: item.category || '',
+            language: item.language || '',
+            proficiency: item.proficiency || '',
+            url: item.url || '',
+            rank: item.rank || '',
+            event: item.event || '',
+            subjects: item.subjects || '',
         })) || [];
       };
 
-      // Special handling for activities to enforce the 3 categories
       const standardizedActivities = [
           'Social Activities',
           'Cultural Activities',
           'Sports Activities'
       ].map(title => {
-          // Attempt to find exact match or close match from AI response
           const found = parsedData.activities?.find((a: any) => a.title === title) 
                         || parsedData.activities?.find((a: any) => a.title?.toLowerCase().includes(title.split(' ')[0].toLowerCase()));
-          
           return {
               id: generateId(),
               title: title,
@@ -238,38 +278,45 @@ const UploadResumePage: React.FC<UploadResumePageProps> = ({ onUploadComplete, o
           };
       });
 
-      // Merge with initial structure to ensure type safety and preserve defaults like images
+      // Also keep general Extracurricular if found
+      const extra = parsedData.activities?.find((a: any) => a.title?.toLowerCase().includes('extra'));
+      if(extra) {
+          standardizedActivities.push({
+              id: generateId(),
+              title: 'EXTRACURRICULAR ACTIVITIES',
+              description: extra.description
+          })
+      }
+
       const finalData: ResumeData = {
           ...initialResumeData,
           personalDetails: {
-              ...initialResumeData.personalDetails, // Keep default images
+              ...initialResumeData.personalDetails,
               ...parsedData.personalDetails,
-              // Restore default images if extraction didn't find any (parsedData won't have image data usually)
               photo: initialResumeData.personalDetails.photo, 
-              logo: initialResumeData.personalDetails.logo 
+              logo: initialResumeData.personalDetails.logo,
+              linkedin: parsedData.personalDetails?.linkedin || '',
+              github: parsedData.personalDetails?.github || '',
           },
+          summary: parsedData.summary || '',
           education: processList(parsedData.education),
           internships: processList(parsedData.internships),
           projects: processList(parsedData.projects),
           achievements: processList(parsedData.achievements),
           skills: processList(parsedData.skills),
           positions: processList(parsedData.positions),
-          activities: standardizedActivities, 
+          activities: standardizedActivities,
+          languages: processList(parsedData.languages),
+          webLinks: processList(parsedData.webLinks),
+          coursework: processList(parsedData.coursework),
+          technicalAchievements: processList(parsedData.technicalAchievements),
       };
       
       onUploadComplete(finalData);
 
     } catch (error: any) {
       console.error("Error processing resume:", error);
-      let errorMessage = "Failed to process the resume.";
-      
-      if (error.message) {
-          errorMessage = error.message;
-          if (error.message.includes("400")) errorMessage += " (Possible Invalid API Key)";
-          if (error.message.includes("429")) errorMessage += " (Quota Exceeded)";
-      }
-      
-      alert(`Error: ${errorMessage}`);
+      alert(`Error: ${error.message || "Failed to process the resume."}`);
     } finally {
       setIsProcessing(false);
     }
@@ -277,8 +324,7 @@ const UploadResumePage: React.FC<UploadResumePageProps> = ({ onUploadComplete, o
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
-       {/* Background Blobs */}
-      <div className="fixed top-[-10%] left-[-5%] w-[50vw] h-[50vw] bg-[#FDF6B2] rounded-full mix-blend-multiply filter blur-[100px] opacity-70 animate-blob pointer-events-none"></div>
+       <div className="fixed top-[-10%] left-[-5%] w-[50vw] h-[50vw] bg-[#FDF6B2] rounded-full mix-blend-multiply filter blur-[100px] opacity-70 animate-blob pointer-events-none"></div>
       <div className="fixed top-[-10%] right-[-10%] w-[50vw] h-[50vw] bg-[#99F6E4] rounded-full mix-blend-multiply filter blur-[100px] opacity-70 animate-blob animation-delay-2000 pointer-events-none"></div>
       
       <div className="relative z-10 flex-grow flex items-center justify-center p-6">
@@ -316,7 +362,6 @@ const UploadResumePage: React.FC<UploadResumePageProps> = ({ onUploadComplete, o
                         <div className="flex flex-col items-center py-8">
                             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600 mb-4"></div>
                             <p className="text-lg font-semibold text-slate-700">Analyzing your resume...</p>
-                            <p className="text-sm text-slate-500">Extracting structure using Gemini Flash 2.5...</p>
                         </div>
                     ) : (
                         <>

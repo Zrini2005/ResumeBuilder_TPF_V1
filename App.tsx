@@ -4,14 +4,20 @@ import TemplateSelectionPage from './pages/TemplateSelectionPage';
 import ResumeBuilderPage from './pages/ResumeBuilderPage';
 import StartOptionPage from './pages/StartOptionPage';
 import UploadResumePage from './pages/UploadResumePage';
+import FAQPage from './pages/FAQPage';
 import type { ResumeData } from './types';
 
 function App() {
-  const [currentView, setCurrentView] = useState<'login' | 'start-option' | 'templates' | 'upload' | 'builder'>('login');
+  const [currentView, setCurrentView] = useState<'login' | 'start-option' | 'templates' | 'upload' | 'builder' | 'faq'>('login');
   const [builderInitialData, setBuilderInitialData] = useState<ResumeData | null>(null);
+  const [selectedTemplate, setSelectedTemplate] = useState<'on-campus' | 'modern-creative' | 'corporate-minimal'>('on-campus');
 
   if (currentView === 'login') {
-    return <LoginPage onGetStarted={() => setCurrentView('start-option')} />;
+    return <LoginPage onGetStarted={() => setCurrentView('start-option')} onHelpClick={() => setCurrentView('faq')} />;
+  }
+
+  if (currentView === 'faq') {
+    return <FAQPage onBack={() => setCurrentView('login')} />;
   }
 
   if (currentView === 'start-option') {
@@ -33,6 +39,8 @@ function App() {
             onUploadComplete={(data) => {
                 setBuilderInitialData(data);
                 setCurrentView('builder');
+                // Default to on-campus for uploaded resumes unless user switches
+                setSelectedTemplate('on-campus'); 
             }}
             onBack={() => setCurrentView('start-option')}
           />
@@ -40,13 +48,22 @@ function App() {
   }
 
   if (currentView === 'templates') {
-    return <TemplateSelectionPage onSelect={() => setCurrentView('builder')} onBack={() => setCurrentView('start-option')} />;
+    return (
+        <TemplateSelectionPage 
+            onSelect={(templateId) => {
+                setSelectedTemplate(templateId);
+                setCurrentView('builder');
+            }} 
+            onBack={() => setCurrentView('start-option')} 
+        />
+    );
   }
 
   return (
     <ResumeBuilderPage 
         initialData={builderInitialData} 
-        onBack={() => setCurrentView('templates')} 
+        selectedTemplate={selectedTemplate}
+        onBack={() => setCurrentView('start-option')} 
     />
   );
 }

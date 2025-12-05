@@ -1,1 +1,1 @@
-// This file has been deprecated. Please use templates/OnCampusResume/ResumePreview.tsx instead.
+// Deleted

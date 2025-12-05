@@ -60,11 +60,13 @@
     padding-left: 3rem; /* Match other lists */
   }
   .custom-square-list li::before {
-    content: '■';
+    content: '';
     position: absolute;
     left: 1.75rem; /* Match other lists */
-    top: 0.2em;
-    font-size: 0.7em;
+    top: 0.55em;
+    width: 5px;
+    height: 5px;
+    background-color: black;
   }
   @keyframes fadeIn {
     from { opacity: 0; transform: translate(-50%, 10px); }

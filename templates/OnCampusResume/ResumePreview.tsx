@@ -17,15 +17,15 @@ interface SectionProps {
 const HEADER_BOTTOM_PADDING = '4px'; 
 
 const Section: React.FC<SectionProps> = ({ title, children, splittable = false }) => (
-    <div className="mb-6 break-inside-avoid" data-splittable={splittable}>
-        <div className="flex items-center mb-1">
+    <div className="mb-6 break-inside-avoid resume-section-container" data-splittable={splittable}>
+        <div className="flex items-center mb-1 section-header-flex">
             <h2 
                 className="text-xl font-bold pr-4 flex-shrink-0" 
                 style={{ paddingBottom: HEADER_BOTTOM_PADDING }}
             >
                 {title}
             </h2>
-            <div className="flex-grow border-t-[4px]" style={{ borderColor: '#C00000' }}></div>
+            <div className="flex-grow border-t-[4px] section-header-line" style={{ borderColor: '#C00000' }}></div>
         </div>
         {children}
     </div>
@@ -43,7 +43,7 @@ const ResumePreview = forwardRef<HTMLDivElement, ResumePreviewProps>(({ resumeDa
   }
 
   return (
-    <div ref={ref} className="bg-white shadow-lg pt-10 px-10 pb-2 leading-relaxed w-[210mm] text-black" style={{ fontFamily: 'Lato, sans-serif' }}>
+    <div ref={ref} className="bg-white shadow-lg pt-14 px-10 pb-2 leading-relaxed w-[210mm] text-black" style={{ fontFamily: 'Lato, sans-serif' }}>
       <header className="flex items-start justify-between pb-4 text-[15px]">
         <div className="flex items-center flex-grow min-w-0">
             {personalDetails.logo && <img src={personalDetails.logo} alt="Institute Logo" className="h-36 w-36 mr-6 flex-shrink-0" />}
@@ -199,16 +199,16 @@ const ResumePreview = forwardRef<HTMLDivElement, ResumePreviewProps>(({ resumeDa
             fontSize: '10pt', 
             color: '#808080',
             lineHeight: '1.2',
-            paddingBottom: '10px' 
+            paddingBottom: '9px' 
         }}
       >
-        <div style={{ borderTop: '1px solid #808080', width: '130px', margin: '0 10px' }}></div>
+        <div style={{ borderTop: '1px solid #2596be', width: '100px', margin: '0 15px' }}></div>
         <div className="px-1">
             <p style={{ margin: 0 }}>Department of Training and Placement, NIT Trichy 620015</p>
             <p style={{ margin: 0 }}>Telephone : +91-431-2501081 | e-mail: tp@nitt.edu,</p>
             <p style={{ margin: 0 }}>tnp.nitt@gmail.com</p>
         </div>
-        <div style={{ borderTop: '1px solid #808080', width: '130px', margin: '0 10px' }}></div>
+        <div style={{ borderTop: '1px solid #2596be', width: '100px', margin: '0 15px' }}></div>
       </footer>
     </div>
   );
