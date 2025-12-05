@@ -15,7 +15,7 @@ const HeaderSection = ({ title }: { title: string }) => (
 const CustomListItem: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => (
-  <li className="relative pl-5 mb-1 last:mb-0 before:content-[''] before:absolute before:left-0 before:top-[0.55em] before:w-1.5 before:h-1.5 before:bg-gray-600 before:rounded-full leading-relaxed">
+  <li className="relative pl-5 mb-1 last:mb-0 before:content-[''] before:absolute before:left-0 before:top-[0.55em] before:w-1.5 before:h-1.5 before:bg-gray-600 before:rounded-full leading-relaxed corporate-minimal-list-item">
     {children}
   </li>
 );
