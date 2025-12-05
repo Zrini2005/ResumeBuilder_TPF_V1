@@ -329,14 +329,14 @@ export const corporateMinimalInitialData: ResumeData = {
       name: "SPAM FILTER",
       date: "Jan 2017 - Present",
       description:
-        "Separating Spam emails from Ham using Naive Bayes and Support Vector Machines.\nTested on subset of 2005 TREC Public Spam Corpus with accuracy of 91.8% using Naive Bayes and 97.2% using Support Vector Machines.",
+        "Separating Spam emails from Ham using Naive Bayes and Support Vector Machines.Tested on subset of 2005 TREC Public Spam Corpus with accuracy of 91.8% using Naive Bayes and 97.2% using Support Vector Machines.",
     },
     {
       id: "proj2",
       name: "STOCK PRICE PREDICTION",
       date: "Aug 2016 - Oct 2016",
       description:
-        "Developed a recurrent neural network using LSTM to predict stock prices.\nTrained the model on 5 years of historical data achieving 85% directional accuracy.",
+        "Developed a recurrent neural network using LSTM to predict stock prices.Trained the model on 5 years of historical data achieving 85% directional accuracy.",
     },
   ],
   skills: [
