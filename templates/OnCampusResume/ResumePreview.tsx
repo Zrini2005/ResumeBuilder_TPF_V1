@@ -43,7 +43,7 @@ const ResumePreview = forwardRef<HTMLDivElement, ResumePreviewProps>(({ resumeDa
   }
 
   return (
-    <div ref={ref} className="bg-white shadow-lg pt-10 px-10 pb-2 leading-relaxed w-[210mm] text-black" style={{ fontFamily: 'Lato, sans-serif' }}>
+    <div ref={ref} className="bg-white shadow-lg pt-14 px-10 pb-2 leading-relaxed w-[210mm] text-black" style={{ fontFamily: 'Lato, sans-serif' }}>
       <header className="flex items-start justify-between pb-4 text-[15px]">
         <div className="flex items-center flex-grow min-w-0">
             {personalDetails.logo && <img src={personalDetails.logo} alt="Institute Logo" className="h-36 w-36 mr-6 flex-shrink-0" />}

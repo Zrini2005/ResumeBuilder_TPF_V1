@@ -249,7 +249,7 @@ function ResumeBuilderPage({ onBack, initialData, selectedTemplate }: ResumeBuil
             `;
         }
 
-        const pdfOverrides = `
+        let pdfOverrides = `
             .section-header-flex {
                 align-items: flex-end !important;
             }
@@ -259,7 +259,33 @@ function ResumeBuilderPage({ onBack, initialData, selectedTemplate }: ResumeBuil
             .resume-section-container {
                 margin-bottom: 1.1rem !important;
             }
+            .custom-square-list li::before {
+                width: 3px !important;
+                height: 3px !important;
+                top: 0.6em !important;
+            }
         `;
+
+        if (selectedTemplate === 'modern-creative') {
+             pdfOverrides += `
+                .modern-creative-skill-tag {
+                    position: relative;
+                    top: -5px;
+                }
+                .modern-creative-date {
+                    position: relative;
+                    top: -2px;
+                }
+                .modern-creative-contact-icon {
+                    position: relative;
+                    top: 4px;
+                }
+                .modern-creative-section-border {
+                    position: relative;
+                    top: 3px;
+                }
+             `;
+        }
 
         style.innerHTML = fontFaceCss + pdfOverrides;
         document.head.appendChild(style);

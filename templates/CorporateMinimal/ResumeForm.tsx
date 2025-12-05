@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { GoogleGenAI } from "@google/genai";
 import type { ResumeData } from '../../types';
 
 interface ResumeFormProps {
@@ -85,6 +86,7 @@ const TextArea: React.FC<{ label: string, value: string, name: string, rows?: nu
 );
 
 const ResumeForm: React.FC<ResumeFormProps> = ({ resumeData, setResumeData }) => {
+  const [enhancingId, setEnhancingId] = useState<string | null>(null);
 
   const handlePersonalChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -118,12 +120,46 @@ const ResumeForm: React.FC<ResumeFormProps> = ({ resumeData, setResumeData }) =>
     }));
   };
 
+  const handleEnhanceWithAi = async <K extends 'projects' | 'positions' | 'internships'>(
+    section: K,
+    id: string,
+    description: string
+  ) => {
+    if (!description.trim()) {
+      alert("Please enter a description to enhance.");
+      return;
+    }
+    setEnhancingId(id);
+    try {
+      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+      const response = await ai.models.generateContent({
+        model: 'gemini-2.5-flash',
+        contents: `Rewrite and enhance the following professional experience description for a resume, making it more impactful, professional, and concise. Focus on action verbs and quantifiable results where possible based on the text. Do not add any new information. Keep the response as a single paragraph. Original description: "${description}"`,
+      });
+      
+      const enhancedDescription = response.text.trim();
+
+      setResumeData(prev => {
+        const newSectionData = (prev[section] as any[]).map(item =>
+          item.id === id ? { ...item, description: enhancedDescription } : item
+        );
+        return { ...prev, [section]: newSectionData };
+      });
+
+    } catch (error) {
+      console.error("AI enhancement failed:", error);
+      alert("Failed to enhance the description. Please try again.");
+    } finally {
+      setEnhancingId(null);
+    }
+  };
+
   return (
     <div className="p-4 bg-white relative">
       <h1 className="text-3xl font-bold text-center mb-8 text-gray-800">Resume Editor</h1>
       
       <FormSection 
-        title="Header Info" 
+        title="Personal Details" 
         defaultOpen={true}
         icon={
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -132,7 +168,6 @@ const ResumeForm: React.FC<ResumeFormProps> = ({ resumeData, setResumeData }) =>
         }
       >
         <Input label="Full Name" name="name" value={resumeData.personalDetails.name} onChange={handlePersonalChange} />
-        <Input label="Sub-header / Link" name="linkedin" value={resumeData.personalDetails.linkedin || ''} onChange={handlePersonalChange} />
         <Input label="Email" name="email" value={resumeData.personalDetails.email} onChange={handlePersonalChange} />
         <Input label="Contact" name="contact" value={resumeData.personalDetails.contact} onChange={handlePersonalChange} />
       </FormSection>
@@ -154,7 +189,7 @@ const ResumeForm: React.FC<ResumeFormProps> = ({ resumeData, setResumeData }) =>
             <Input label="Date / Year" name="year" value={edu.year} onChange={(e) => handleDynamicChange('education', edu.id, e)} />
             <Input label="Grade / Aggregate" name="grade" value={edu.grade} onChange={(e) => handleDynamicChange('education', edu.id, e)} />
             <div className="flex justify-end">
-                <button onClick={() => removeDynamicItem('education', edu.id)} className="text-xs text-red-500 font-bold uppercase hover:underline">Remove</button>
+                <button onClick={() => removeDynamicItem('education', edu.id)} className="px-3 py-1.5 bg-red-500 text-white rounded-md hover:bg-red-600 text-xs font-semibold shadow-sm transition-colors">Remove</button>
             </div>
           </div>
         ))}
@@ -174,7 +209,7 @@ const ResumeForm: React.FC<ResumeFormProps> = ({ resumeData, setResumeData }) =>
                   <Input label="Name (e.g. Github)" name="name" value={link.name} onChange={(e) => handleDynamicChange('webLinks', link.id, e)} />
                   <Input label="URL / Handle" name="url" value={link.url} onChange={(e) => handleDynamicChange('webLinks', link.id, e)} />
                   <div className="flex justify-end">
-                    <button onClick={() => removeDynamicItem('webLinks', link.id)} className="text-xs text-red-500 font-bold uppercase hover:underline">Remove</button>
+                    <button onClick={() => removeDynamicItem('webLinks', link.id)} className="px-3 py-1.5 bg-red-500 text-white rounded-md hover:bg-red-600 text-xs font-semibold shadow-sm transition-colors">Remove</button>
                   </div>
               </div>
           ))}
@@ -194,12 +229,41 @@ const ResumeForm: React.FC<ResumeFormProps> = ({ resumeData, setResumeData }) =>
                   <Input label="Category (e.g. Undergraduate)" name="category" value={cw.category} onChange={(e) => handleDynamicChange('coursework', cw.id, e)} />
                   <TextArea label="Subjects (One per line)" name="subjects" rows={4} value={cw.subjects} onChange={(e) => handleDynamicChange('coursework', cw.id, e)} />
                   <div className="flex justify-end">
-                    <button onClick={() => removeDynamicItem('coursework', cw.id)} className="text-xs text-red-500 font-bold uppercase hover:underline">Remove</button>
+                    <button onClick={() => removeDynamicItem('coursework', cw.id)} className="px-3 py-1.5 bg-red-500 text-white rounded-md hover:bg-red-600 text-xs font-semibold shadow-sm transition-colors">Remove</button>
                   </div>
                </div>
           ))}
           <button onClick={() => addDynamicItem('coursework', {id: crypto.randomUUID(), category: '', subjects: ''})} className="mt-4 w-full py-2 border-2 border-dashed border-emerald-200 text-emerald-600 rounded-lg hover:bg-emerald-50 hover:border-emerald-300 transition-colors font-semibold text-sm">+ Add Coursework</button>
       </FormSection>
+
+      <FormSection 
+            title="Internship Experience"
+            icon={
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                </svg>
+            }
+       >
+        {resumeData.internships.map((intern) => (
+            <div key={intern.id} className="border-b border-gray-100 pb-4 mb-4 last:border-0 last:pb-0 last:mb-0">
+                <Input label="Role Title" name="title" value={intern.title} onChange={(e) => handleDynamicChange('internships', intern.id, e)} />
+                <Input label="Date" name="date" value={intern.date} onChange={(e) => handleDynamicChange('internships', intern.id, e)} />
+                <TextArea label="Description" name="description" rows={4} value={intern.description} onChange={(e) => handleDynamicChange('internships', intern.id, e)} />
+                <p className="text-xs text-gray-400 -mt-2 mb-2 ml-1">Use &lt;b&gt;text&lt;/b&gt; to make text bold.</p>
+                <div className="flex items-center justify-between mt-3">
+                    <button
+                        onClick={() => handleEnhanceWithAi('internships', intern.id, intern.description)}
+                        disabled={enhancingId === intern.id}
+                        className="px-3 py-1.5 bg-emerald-50 text-emerald-600 border border-emerald-200 rounded-md hover:bg-emerald-100 disabled:opacity-50 flex items-center space-x-2 text-xs font-semibold"
+                    >
+                        {enhancingId === intern.id ? (<span>Enhancing...</span>) : <span>Enhance with AI</span>}
+                    </button>
+                    <button onClick={() => removeDynamicItem('internships', intern.id)} className="px-3 py-1.5 bg-red-500 text-white rounded-md hover:bg-red-600 text-xs font-semibold shadow-sm transition-colors">Remove</button>
+                </div>
+            </div>
+        ))}
+        <button onClick={() => addDynamicItem('internships', {id: crypto.randomUUID(), title: '', date: '', description: ''})} className="mt-4 w-full py-2 border-2 border-dashed border-emerald-200 text-emerald-600 rounded-lg hover:bg-emerald-50 hover:border-emerald-300 transition-colors font-semibold text-sm">+ Add Internship</button>
+       </FormSection>
 
       <FormSection 
         title="Projects"
@@ -214,8 +278,16 @@ const ResumeForm: React.FC<ResumeFormProps> = ({ resumeData, setResumeData }) =>
                 <Input label="Project Name | Tech Stack" name="name" value={proj.name} onChange={(e) => handleDynamicChange('projects', proj.id, e)} />
                 <Input label="Date" name="date" value={proj.date} onChange={(e) => handleDynamicChange('projects', proj.id, e)} />
                 <TextArea label="Description" name="description" rows={4} value={proj.description} onChange={(e) => handleDynamicChange('projects', proj.id, e)} />
-                <div className="flex justify-end">
-                    <button onClick={() => removeDynamicItem('projects', proj.id)} className="text-xs text-red-500 font-bold uppercase hover:underline">Remove</button>
+                <p className="text-xs text-gray-400 -mt-2 mb-2 ml-1">Use &lt;b&gt;text&lt;/b&gt; to make text bold.</p>
+                <div className="flex items-center justify-between mt-3">
+                     <button
+                        onClick={() => handleEnhanceWithAi('projects', proj.id, proj.description)}
+                        disabled={enhancingId === proj.id}
+                        className="px-3 py-1.5 bg-emerald-50 text-emerald-600 border border-emerald-200 rounded-md hover:bg-emerald-100 disabled:opacity-50 flex items-center space-x-2 text-xs font-semibold"
+                    >
+                        {enhancingId === proj.id ? (<span>Enhancing...</span>) : <span>Enhance with AI</span>}
+                    </button>
+                    <button onClick={() => removeDynamicItem('projects', proj.id)} className="px-3 py-1.5 bg-red-500 text-white rounded-md hover:bg-red-600 text-xs font-semibold shadow-sm transition-colors">Remove</button>
                 </div>
             </div>
         ))}
@@ -233,8 +305,9 @@ const ResumeForm: React.FC<ResumeFormProps> = ({ resumeData, setResumeData }) =>
         {resumeData.achievements.map((ach) => (
             <div key={ach.id} className="border-b border-gray-100 pb-4 mb-4 last:border-0 last:pb-0 last:mb-0">
                 <TextArea label="Description" name="description" value={ach.description} onChange={(e) => handleDynamicChange('achievements', ach.id, e)} />
+                <p className="text-xs text-gray-400 -mt-2 mb-2 ml-1">Use &lt;b&gt;text&lt;/b&gt; to make text bold.</p>
                 <div className="flex justify-end">
-                    <button onClick={() => removeDynamicItem('achievements', ach.id)} className="text-xs text-red-500 font-bold uppercase hover:underline">Remove</button>
+                    <button onClick={() => removeDynamicItem('achievements', ach.id)} className="px-3 py-1.5 bg-red-500 text-white rounded-md hover:bg-red-600 text-xs font-semibold shadow-sm transition-colors">Remove</button>
                 </div>
             </div>
         ))}
@@ -254,7 +327,7 @@ const ResumeForm: React.FC<ResumeFormProps> = ({ resumeData, setResumeData }) =>
                     <Input label="Category (e.g. LANGUAGES)" name="category" value={skill.category} onChange={(e) => handleDynamicChange('skills', skill.id, e)} />
                     <TextArea label="Details" name="skills" value={skill.skills} onChange={(e) => handleDynamicChange('skills', skill.id, e)} />
                     <div className="flex justify-end">
-                        <button onClick={() => removeDynamicItem('skills', skill.id)} className="text-xs text-red-500 font-bold uppercase hover:underline">Remove</button>
+                        <button onClick={() => removeDynamicItem('skills', skill.id)} className="px-3 py-1.5 bg-red-500 text-white rounded-md hover:bg-red-600 text-xs font-semibold shadow-sm transition-colors">Remove</button>
                     </div>
                 </div>
             ))}
@@ -271,9 +344,10 @@ const ResumeForm: React.FC<ResumeFormProps> = ({ resumeData, setResumeData }) =>
         >
             {resumeData.positions.map(pos => (
                  <div key={pos.id} className="border-b border-gray-100 pb-4 mb-4 last:border-0 last:pb-0 last:mb-0">
-                    <TextArea label="Description (Support HTML tags like <b>)" name="description" value={pos.description} onChange={(e) => handleDynamicChange('positions', pos.id, e)} />
+                    <TextArea label="Description" name="description" value={pos.description} onChange={(e) => handleDynamicChange('positions', pos.id, e)} />
+                    <p className="text-xs text-gray-400 -mt-2 mb-2 ml-1">Use &lt;b&gt;text&lt;/b&gt; to make text bold.</p>
                     <div className="flex justify-end">
-                        <button onClick={() => removeDynamicItem('positions', pos.id)} className="text-xs text-red-500 font-bold uppercase hover:underline">Remove</button>
+                        <button onClick={() => removeDynamicItem('positions', pos.id)} className="px-3 py-1.5 bg-red-500 text-white rounded-md hover:bg-red-600 text-xs font-semibold shadow-sm transition-colors">Remove</button>
                     </div>
                  </div>
             ))}
@@ -292,6 +366,7 @@ const ResumeForm: React.FC<ResumeFormProps> = ({ resumeData, setResumeData }) =>
                  act.title === 'EXTRACURRICULAR ACTIVITIES' && (
                      <div key={act.id}>
                           <TextArea label="Description (One per line)" name="description" rows={5} value={act.description} onChange={(e) => handleDynamicChange('activities', act.id, e)} />
+                          <p className="text-xs text-gray-400 -mt-2 mb-2 ml-1">Use &lt;b&gt;text&lt;/b&gt; to make text bold.</p>
                      </div>
                  )
              ))}

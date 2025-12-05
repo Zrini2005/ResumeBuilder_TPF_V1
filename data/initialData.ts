@@ -41,9 +41,9 @@ export const initialResumeData: ResumeData = {
   projects: [
     {
       id: 'proj1',
-      name: 'RideNITT',
+      name: 'Smart Inventory System',
       date: 'January 2025 - March 2025',
-      description: 'Developed RideNitt, a ride-sharing platform for students, using React.js, Tailwind CSS, and an Express.js backend with PostgreSQL, featuring Google OAuth2 and Leaflet.js for routing.',
+      description: 'Designed and deployed a comprehensive inventory management system using the MERN stack to streamline stock tracking for local businesses. Implemented real-time data visualization dashboards using Chart.js to analyze sales trends and predict future stock requirements with 95% accuracy. Integrated a secure payment gateway and role-based access control to ensure data privacy and secure transactions for over 500 active users.',
     },
     {
       id: 'proj2',
@@ -55,7 +55,7 @@ export const initialResumeData: ResumeData = {
       id: 'proj3',
       name: 'Chatty',
       date: 'June 2025',
-      description: 'Built Chatty, a real-time chat application with one-on-one messaging and online status, using the MERN stack with Socket.io, JWT for security, and Zustand for state management.',
+      description: 'Built Chatty, a real-time chat application with one-on-one messaging and online status, using the MERN stack with Socket.io, JWT for security, and Zustand for state management. Optimized database queries and implemented a caching layer, improving message delivery speed by 30%.',
     },
   ],
   skills: [
@@ -69,8 +69,8 @@ export const initialResumeData: ResumeData = {
     { id: 'pos2', title: 'Manager, Marketing, Festember', date: 'Mar 2024 - Present', description: 'Worked as a Marketing Manager of Festember\'24, the annual cultural festival of NIT Trichy. Executed the task of establishing partnerships with various companies through effective communication and negotiation strategies.'},
   ],
   activities: [
-      { id: 'act1', title: 'Social Activities', description: 'A volunteer under the HumaNITTy programme, NIT Trichy chapter, which aims at visiting local old age homes and orphanages and spending quality time with them.\nConducted Breast Cancer Awareness during my tenure as an A-Flight NCC Cadet at NIT Trichy.'},
-      { id: 'act2', title: 'Cultural Activities', description: 'Secured 1st position in Pixel Pirates event of Pragyan in 2023.\nParticipated in the Republic Day Parade of NIT Trichy in 2024.\nDAN 1 - Black Belt Holder in Karate'},
+      { id: 'act1', title: 'Social Activities', description: 'A volunteer under the HumaNITTy programme, NIT Trichy chapter, which aims at visiting local old age homes and orphanages and spending quality time with them.\nOrganized a campus-wide blood donation camp in collaboration with the Red Cross Society, collecting over 200 units of blood.'},
+      { id: 'act2', title: 'Cultural Activities', description: 'Secured 1st position in Pixel Pirates event of Pragyan in 2023.\nDAN 1 - Black Belt Holder in Karate'},
       { id: 'act3', title: 'Sports Activities', description: 'Participated in 10K sportsfete marathon'},
   ],
   languages: [],
@@ -163,19 +163,22 @@ export const corporateMinimalInitialData: ResumeData = {
     },
     summary: '',
     education: [
-      { id: 'edu1', year: 'Expected June 2019', degree: 'B.Tech in Computer Science', institution: 'NATIONAL INSTITUTE OF TECHNOLOGY', grade: 'Cum. GPA: 9.13/10.0' },
+      { id: 'edu1', year: 'Expected June 2019', degree: 'B.Tech in Computer Science', institution: 'NATIONAL INSTITUTE OF TECHNOLOGY DURGAPUR', grade: 'Cum. GPA: 9.13/10.0' },
       { id: 'edu2', year: 'Grad. May 2013', degree: 'Indian Certificate of Secondary Education', institution: 'DON BOSCO SCHOOL BANDEL', grade: 'Aggregate: 94.6 %' },
       { id: 'edu3', year: 'Grad. May 2015', degree: 'Indian School Certificate', institution: 'DON BOSCO SCHOOL BANDEL', grade: 'Aggregate: 97.0 %' },
     ],
-    internships: [],
+    internships: [
+        {
+            id: 'int1',
+            title: 'Research Intern at IIT Madras',
+            date: 'June 2018 - August 2018',
+            description: 'Worked on Machine Learning algorithms for predictive analysis. Optimized data processing pipelines using Python and Scikit-Learn.\nImplemented a new feature selection method that improved model accuracy by 15%.',
+        }
+    ],
     achievements: [
         { id: 'ach1', description: 'Secured <b>Top 1 percentile</b> in Indian School Certificate Examination 2015.' },
         { id: 'ach2', description: 'School and City Topper at 6th National Cyber Olympiad.' },
         { id: 'ach3', description: 'Active Participant in Competitive Programming Contests held over Codechef, Codeforces, Hackerrank and other Online Judge Platforms.' },
-        { id: 'ach4', description: 'Hackerrank Max Percentile: <b>97.23</b> among 1.37 lakh active users.' },
-        { id: 'ach5', description: 'Level "Expert" on Codeforces with <b>Rating 1780</b>' },
-        { id: 'ach6', description: 'Solved Over 150 problems on <b>SPOJ</b>' },
-        { id: 'ach7', description: 'Been at <b>top ranks</b> in annual online programming/debugging coding contests conducted by various universities in India, like NITs and IITs.' },
     ],
     projects: [
       {
@@ -183,6 +186,12 @@ export const corporateMinimalInitialData: ResumeData = {
         name: 'SPAM FILTER',
         date: 'Jan 2017 - Present',
         description: 'Separating Spam emails from Ham using Naive Bayes and Support Vector Machines.\nTested on subset of 2005 TREC Public Spam Corpus with accuracy of 91.8% using Naive Bayes and 97.2% using Support Vector Machines.',
+      },
+      {
+        id: 'proj2',
+        name: 'STOCK PRICE PREDICTION',
+        date: 'Aug 2016 - Oct 2016',
+        description: 'Developed a recurrent neural network using LSTM to predict stock prices.\nTrained the model on 5 years of historical data achieving 85% directional accuracy.',
       },
     ],
     skills: [
@@ -194,7 +203,7 @@ export const corporateMinimalInitialData: ResumeData = {
         { id: 'pos2', title: '', date: '', description: '<b>Mentoring Competitive Programming Aspirants</b> through my blog on Algorithms, Programming and Mathematical concepts.'},
     ],
     activities: [
-        { id: 'act1', title: 'EXTRACURRICULAR ACTIVITIES', description: 'Top Performer at a Global Tech Company Challenge titled "<b>Design the future of gaming and entertainment</b>"\nWon "Be a Billionaire" event, which tested the business acumen and prowess in shares and stock market, at Aarohan, Techno-Management Fest at NIT Durgapur.\nHobbies: Sudoku Solving, Cycling and playing Cricket.'},
+        { id: 'act1', title: 'EXTRACURRICULAR ACTIVITIES', description: 'Top Performer at a Global Tech Company Challenge titled "<b>Design the future of gaming and entertainment</b>"\nHobbies: Sudoku Solving, Cycling and playing Cricket.'},
     ],
     languages: [],
     webLinks: [

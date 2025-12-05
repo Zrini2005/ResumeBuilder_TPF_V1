@@ -6,7 +6,7 @@ interface ResumePreviewProps {
 }
 
 const HeaderSection = ({ title }: { title: string }) => (
-    <h3 className="text-lg font-bold tracking-widest text-gray-800 uppercase mb-4 mt-6 first:mt-0">
+    <h3 className="text-lg font-bold tracking-widest text-gray-800 uppercase mb-2">
         {title}
     </h3>
 );
@@ -20,7 +20,7 @@ const CustomListItem: React.FC<{ children: React.ReactNode }> = ({ children }) =
 
 const ResumePreview = forwardRef<HTMLDivElement, ResumePreviewProps>(({ resumeData }, ref) => {
   const { 
-    personalDetails, education, projects, achievements, skills, positions, activities, webLinks, coursework 
+    personalDetails, education, projects, internships, achievements, skills, positions, activities, webLinks, coursework 
   } = resumeData;
 
   const renderHTML = (text: string) => {
@@ -34,10 +34,8 @@ const ResumePreview = forwardRef<HTMLDivElement, ResumePreviewProps>(({ resumeDa
         {/* Header */}
         <header className="text-center mb-6">
             <h1 className="text-5xl font-light text-gray-900 mb-2 tracking-wide">{personalDetails.name}</h1>
-            <div className="text-sm text-gray-600 space-x-2 font-medium">
-                {personalDetails.linkedin && <span className="text-gray-700">https://{personalDetails.linkedin}</span>}
-            </div>
-            <div className="text-sm text-gray-600 flex justify-center items-center gap-2 mt-1">
+            
+            <div className="text-sm text-gray-600 flex justify-center items-center gap-2 mt-2 font-medium">
                 {personalDetails.email && <span>{personalDetails.email}</span>}
                 {personalDetails.email && personalDetails.contact && <span className="text-gray-400">|</span>}
                 {personalDetails.contact && <span>{personalDetails.contact}</span>}
@@ -50,7 +48,7 @@ const ResumePreview = forwardRef<HTMLDivElement, ResumePreviewProps>(({ resumeDa
         <div className="flex flex-row gap-8">
             
             {/* Left Column (Approx 35-40%) */}
-            <div className="w-[40%] flex-shrink-0">
+            <div className="w-[40%] flex-shrink-0 flex flex-col gap-8">
                 {/* EDUCATION */}
                 {education && education.length > 0 && (
                     <section>
@@ -120,7 +118,25 @@ const ResumePreview = forwardRef<HTMLDivElement, ResumePreviewProps>(({ resumeDa
             </div>
 
             {/* Right Column (Approx 60-65%) */}
-            <div className="flex-grow">
+            <div className="flex-grow flex flex-col gap-8">
+                 {/* INTERNSHIP EXPERIENCE */}
+                 {internships && internships.length > 0 && (
+                    <section>
+                        <HeaderSection title="Internship Experience" />
+                        <div className="space-y-6">
+                            {internships.map(intern => (
+                                <div key={intern.id}>
+                                    <div className="flex justify-between items-baseline mb-1">
+                                        <div className="font-bold text-base uppercase text-gray-900">{intern.title}</div>
+                                        <div className="text-sm text-gray-500 italic font-medium">{intern.date}</div>
+                                    </div>
+                                    <div className="text-sm text-gray-700 leading-relaxed" dangerouslySetInnerHTML={{ __html: renderHTML(intern.description) }}></div>
+                                </div>
+                            ))}
+                        </div>
+                    </section>
+                 )}
+
                  {/* PROJECTS */}
                  {projects && projects.length > 0 && (
                     <section>

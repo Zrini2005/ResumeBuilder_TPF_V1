@@ -284,6 +284,7 @@ const ResumeForm: React.FC<ResumeFormProps> = ({ resumeData, setResumeData, phot
         icon={<svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h7" /></svg>}
       >
         <TextArea label="Summary" name="summary" rows={5} value={resumeData.summary} onChange={handleSummaryChange} />
+        <p className="text-xs text-gray-400 -mt-2 mb-2 ml-1">Use &lt;b&gt;text&lt;/b&gt; to make text bold.</p>
       </FormSection>
       
       <FormSection 
@@ -313,6 +314,7 @@ const ResumeForm: React.FC<ResumeFormProps> = ({ resumeData, setResumeData, phot
                 <Input label="Role Title" name="title" value={intern.title} onChange={(e) => handleDynamicChange('internships', intern.id, e)} />
                 <Input label="Date" name="date" value={intern.date} onChange={(e) => handleDynamicChange('internships', intern.id, e)} />
                 <TextArea label="Description" name="description" rows={4} value={intern.description} onChange={(e) => handleDynamicChange('internships', intern.id, e)} />
+                <p className="text-xs text-gray-400 -mt-2 mb-2 ml-1">Use &lt;b&gt;text&lt;/b&gt; to make text bold.</p>
                 <div className="flex items-center justify-between mt-3">
                     <button
                         onClick={() => handleEnhanceWithAi('internships', intern.id, intern.description)}
@@ -337,6 +339,7 @@ const ResumeForm: React.FC<ResumeFormProps> = ({ resumeData, setResumeData, phot
                 <Input label="Project Name" name="name" value={proj.name} onChange={(e) => handleDynamicChange('projects', proj.id, e)} />
                 <Input label="Date" name="date" value={proj.date} onChange={(e) => handleDynamicChange('projects', proj.id, e)} />
                 <TextArea label="Description" name="description" rows={4} value={proj.description} onChange={(e) => handleDynamicChange('projects', proj.id, e)} />
+                <p className="text-xs text-gray-400 -mt-2 mb-2 ml-1">Use &lt;b&gt;text&lt;/b&gt; to make text bold. Use a newline for bullet points.</p>
                 <div className="flex items-center justify-between mt-3">
                      <button
                         onClick={() => handleEnhanceWithAi('projects', proj.id, proj.description)}
@@ -388,6 +391,7 @@ const ResumeForm: React.FC<ResumeFormProps> = ({ resumeData, setResumeData, phot
         {resumeData.achievements.map((ach) => (
             <div key={ach.id} className="border-b border-gray-100 pb-4 mb-4 last:border-0 last:pb-0 last:mb-0">
                 <TextArea label="Description" name="description" value={ach.description} onChange={(e) => handleDynamicChange('achievements', ach.id, e)} />
+                <p className="text-xs text-gray-400 -mt-2 mb-2 ml-1">Use &lt;b&gt;text&lt;/b&gt; to make text bold.</p>
                 <div className="flex justify-end">
                     <button onClick={() => removeDynamicItem('achievements', ach.id)} className="px-3 py-1.5 bg-red-500 text-white rounded-md hover:bg-red-600 text-xs font-semibold">Remove</button>
                 </div>
@@ -408,6 +412,7 @@ const ResumeForm: React.FC<ResumeFormProps> = ({ resumeData, setResumeData, phot
               value={act.description} 
               onChange={(e) => handleDynamicChange('activities', act.id, e)} 
             />
+            <p className="text-xs text-gray-400 -mt-2 mb-2 ml-1">Use &lt;b&gt;text&lt;/b&gt; to make text bold.</p>
           </div>
         ))}
        </FormSection>
