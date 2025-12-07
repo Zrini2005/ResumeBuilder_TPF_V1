@@ -191,15 +191,19 @@ function ResumeBuilderPage({
 
       let latoRegularBase64, latoBoldBase64, cambriaBase64;
 
+      // Use absolute paths that work with GitHub Pages base path
+      const basePath = import.meta.env.BASE_URL || '/';
+      const fontsPath = `${basePath}fonts/`;
+
       try {
-        latoRegularBase64 = await getFontBase64("./fonts/Lato-Regular.ttf");
-        latoBoldBase64 = await getFontBase64("./fonts/Lato-Bold.ttf");
+        latoRegularBase64 = await getFontBase64(`${fontsPath}Lato-Regular.ttf`);
+        latoBoldBase64 = await getFontBase64(`${fontsPath}Lato-Bold.ttf`);
       } catch (error) {
         console.error("Font loading error", error);
       }
 
       try {
-        cambriaBase64 = await getFontBase64("./fonts/Cambria-Regular.ttf");
+        cambriaBase64 = await getFontBase64(`${fontsPath}Cambria-Regular.ttf`);
       } catch (error) {
         console.error("Cambria font loading error", error);
       }
