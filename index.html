@@ -5,79 +5,92 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>ResuMate</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Lato:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
     <script>
-      window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+      window.pdfjsLib.GlobalWorkerOptions.workerSrc =
+        "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
     </script>
-    <link rel="stylesheet" href="https://unpkg.com/react-image-crop/dist/ReactCrop.css" />
-  <script type="importmap">
-{
-  "imports": {
-    "react/": "https://aistudiocdn.com/react@^19.2.0/",
-    "react": "https://aistudiocdn.com/react@^19.2.0",
-    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
-    "@google/genai": "https://aistudiocdn.com/@google/genai",
-    "react-image-crop": "https://esm.sh/react-image-crop@11.0.5"
-  }
-}
-</script>
-<style>
-  body {
-    font-family: 'Lato', sans-serif;
-  }
-  .custom-bullet-list {
-    list-style: none;
-    padding-left: 0;
-  }
-  .custom-bullet-list li {
-    position: relative;
-    padding-left: 2rem; /* Corresponds to pl-8 */
-  }
-  .custom-bullet-list li::before {
-    content: '•';
-    position: absolute;
-    left: 0.75rem; /* Adjust horizontal position of bullet */
-    top: 0.05em; /* Adjust vertical position to align with text */
-    font-size: 1em;
-  }
-  .technical-skills-list li {
-    padding-left: 3rem; /* Corresponds to pl-12 */
-  }
-  .technical-skills-list li::before {
-    left: 1.75rem; /* Moves bullet further right */
-  }
-  .custom-square-list {
-    list-style: none;
-    padding-left: 0;
-  }
-  .custom-square-list li {
-    position: relative;
-    padding-left: 3rem; /* Match other lists */
-  }
-  .custom-square-list li::before {
-    content: '';
-    position: absolute;
-    left: 1.75rem; /* Match other lists */
-    top: 0.55em;
-    width: 5px;
-    height: 5px;
-    background-color: black;
-  }
-  @keyframes fadeIn {
-    from { opacity: 0; transform: translate(-50%, 10px); }
-    to { opacity: 1; transform: translate(-50%, 0); }
-  }
-  .animate-fade-in {
-    animation: fadeIn 0.3s ease-out forwards;
-    transform: translateX(-50%);
-  }
-</style>
-</head>
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/react-image-crop/dist/ReactCrop.css"
+    />
+    <script type="importmap">
+      {
+        "imports": {
+          "react/": "https://aistudiocdn.com/react@^19.2.0/",
+          "react": "https://aistudiocdn.com/react@^19.2.0",
+          "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
+          "@google/genai": "https://aistudiocdn.com/@google/genai",
+          "react-image-crop": "https://esm.sh/react-image-crop@11.0.5"
+        }
+      }
+    </script>
+    <style>
+      body {
+        font-family: "Lato", sans-serif;
+      }
+      .custom-bullet-list {
+        list-style: none;
+        padding-left: 0;
+      }
+      .custom-bullet-list li {
+        position: relative;
+        padding-left: 2rem; /* Corresponds to pl-8 */
+      }
+      .custom-bullet-list li::before {
+        content: "•";
+        position: absolute;
+        left: 0.75rem; /* Adjust horizontal position of bullet */
+        top: 0.05em; /* Adjust vertical position to align with text */
+        font-size: 1em;
+      }
+      .technical-skills-list li {
+        padding-left: 3rem; /* Corresponds to pl-12 */
+      }
+      .technical-skills-list li::before {
+        left: 1.75rem; /* Moves bullet further right */
+      }
+      .custom-square-list {
+        list-style: none;
+        padding-left: 0;
+      }
+      .custom-square-list li {
+        position: relative;
+        padding-left: 3rem; /* Match other lists */
+      }
+      .custom-square-list li::before {
+        content: "";
+        position: absolute;
+        left: 1.75rem; /* Match other lists */
+        top: 0.55em;
+        width: 5px;
+        height: 5px;
+        background-color: black;
+      }
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translate(-50%, 10px);
+        }
+        to {
+          opacity: 1;
+          transform: translate(-50%, 0);
+        }
+      }
+      .animate-fade-in {
+        animation: fadeIn 0.3s ease-out forwards;
+        transform: translateX(-50%);
+      }
+    </style>
+  </head>
   <body class="bg-gray-200">
     <div id="root"></div>
     <script type="module" src="/index.tsx"></script>

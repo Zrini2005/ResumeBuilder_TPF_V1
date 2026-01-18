@@ -4,6 +4,7 @@ import type { ResumeData } from "../../types";
 interface ResumePreviewProps {
   resumeData: ResumeData;
   themeColor: string;
+  isDownloading?: boolean;
 }
 
 // Pre-calculated colors to simulate opacity over the specific background themes.
@@ -55,7 +56,7 @@ const THEME_PALETTES: Record<
 };
 
 const ResumePreview = forwardRef<HTMLDivElement, ResumePreviewProps>(
-  ({ resumeData, themeColor }, ref) => {
+  ({ resumeData, themeColor, isDownloading }, ref) => {
     const {
       personalDetails,
       education,
@@ -96,6 +97,11 @@ const ResumePreview = forwardRef<HTMLDivElement, ResumePreviewProps>(
       color: palette.textPrimary,
     };
     const photoBorderStyle = { borderColor: palette.border };
+    const sectionBorderStyle = {
+      backgroundColor: themeColor,
+      position: "relative" as const,
+      top: "0px",
+    };
 
     return (
       <div
@@ -250,7 +256,7 @@ const ResumePreview = forwardRef<HTMLDivElement, ResumePreviewProps>(
                       skill.trim() && (
                         <span
                           key={`${idx}-${sIdx}`}
-                          className="px-2 py-1 text-xs rounded-md modern-creative-skill-tag"
+                          className="inline-flex items-center justify-center px-2 py-1 text-xs rounded-md leading-none h-6 modern-creative-skill-tag"
                           style={tagStyle}
                         >
                           {skill.trim()}
@@ -303,10 +309,10 @@ const ResumePreview = forwardRef<HTMLDivElement, ResumePreviewProps>(
           {/* Professional Summary */}
           {summary && (
             <div className="mb-5">
-              <div className="flex mb-3">
+              <div className="flex items-center mb-3">
                 <div
-                  className="w-1 mr-3 flex-shrink-0 modern-creative-section-border"
-                  style={{ backgroundColor: themeColor }}
+                  className="w-1 h-8 mr-3 flex-shrink-0 modern-creative-section-border"
+                  style={sectionBorderStyle}
                 ></div>
                 <h2 className="text-lg font-bold uppercase text-slate-800">
                   Professional Summary
@@ -321,10 +327,10 @@ const ResumePreview = forwardRef<HTMLDivElement, ResumePreviewProps>(
           {/* Internships */}
           {internships && internships.length > 0 && (
             <div className="mb-5">
-              <div className="flex mb-3">
+              <div className="flex items-center mb-3">
                 <div
-                  className="w-1 mr-3 flex-shrink-0 modern-creative-section-border"
-                  style={{ backgroundColor: themeColor }}
+                  className="w-1 h-8 mr-3 flex-shrink-0 modern-creative-section-border"
+                  style={sectionBorderStyle}
                 ></div>
                 <h2 className="text-lg font-bold uppercase text-slate-800">
                   Experience
@@ -340,7 +346,7 @@ const ResumePreview = forwardRef<HTMLDivElement, ResumePreviewProps>(
                       >
                         {intern.title}
                       </h3>
-                      <span className="text-xs font-semibold text-slate-500 bg-slate-100 px-2 py-1 rounded modern-creative-date">
+                      <span className="inline-flex items-center justify-center text-xs font-semibold text-slate-500 bg-slate-100 px-2 py-1 rounded leading-none h-6 modern-creative-date">
                         {intern.date}
                       </span>
                     </div>
@@ -359,10 +365,10 @@ const ResumePreview = forwardRef<HTMLDivElement, ResumePreviewProps>(
           {/* Projects */}
           {projects && projects.length > 0 && (
             <div className="mb-5">
-              <div className="flex mb-3">
+              <div className="flex items-center mb-3">
                 <div
-                  className="w-1 mr-3 flex-shrink-0 modern-creative-section-border"
-                  style={{ backgroundColor: themeColor }}
+                  className="w-1 h-8 mr-3 flex-shrink-0 modern-creative-section-border"
+                  style={sectionBorderStyle}
                 ></div>
                 <h2 className="text-lg font-bold uppercase text-slate-800">
                   Projects
@@ -378,7 +384,7 @@ const ResumePreview = forwardRef<HTMLDivElement, ResumePreviewProps>(
                       >
                         {proj.name}
                       </h3>
-                      <span className="text-xs font-semibold text-slate-500 bg-slate-100 px-2 py-1 rounded modern-creative-date">
+                      <span className="inline-flex items-center justify-center text-xs font-semibold text-slate-500 bg-slate-100 px-2 py-1 rounded leading-none h-6 modern-creative-date">
                         {proj.date}
                       </span>
                     </div>
@@ -416,10 +422,10 @@ const ResumePreview = forwardRef<HTMLDivElement, ResumePreviewProps>(
           {/* Achievements */}
           {achievements && achievements.length > 0 && (
             <div className="mb-5">
-              <div className="flex mb-3">
+              <div className="flex items-center mb-3">
                 <div
-                  className="w-1 mr-3 flex-shrink-0 modern-creative-section-border"
-                  style={{ backgroundColor: themeColor }}
+                  className="w-1 h-8 mr-3 flex-shrink-0 modern-creative-section-border"
+                  style={sectionBorderStyle}
                 ></div>
                 <h2 className="text-lg font-bold uppercase text-slate-800">
                   Achievements
@@ -440,10 +446,10 @@ const ResumePreview = forwardRef<HTMLDivElement, ResumePreviewProps>(
           {activities &&
             activities.some((act) => act.description.trim() !== "") && (
               <div className="mb-5">
-                <div className="flex mb-3">
+                <div className="flex items-center mb-3">
                   <div
-                    className="w-1 mr-3 flex-shrink-0 modern-creative-section-border"
-                    style={{ backgroundColor: themeColor }}
+                    className="w-1 h-8 mr-3 flex-shrink-0 modern-creative-section-border"
+                    style={sectionBorderStyle}
                   ></div>
                   <h2 className="text-lg font-bold uppercase text-slate-800">
                     Activities
