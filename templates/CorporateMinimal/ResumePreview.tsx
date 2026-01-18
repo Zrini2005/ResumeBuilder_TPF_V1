@@ -51,7 +51,7 @@ const ResumePreview = forwardRef<HTMLDivElement, ResumePreviewProps>(
       >
         {/* Header */}
         <header className="text-center mb-2">
-          <h1 className="text-4xl font-light text-gray-900 mb-1 tracking-wide">
+          <h1 className="text-4xl font-light text-gray-900 mb-3 tracking-wide">
             {personalDetails.name}
           </h1>
 
