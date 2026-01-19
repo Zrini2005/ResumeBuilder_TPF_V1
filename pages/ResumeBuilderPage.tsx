@@ -8,7 +8,6 @@ import ModernCreativeResumeForm from "../templates/ModernCreative/ResumeForm";
 import ModernCreativePaginatedResume, {
   PaginatedResumeHandle as ModernPaginatedResumeHandle,
 } from "../templates/ModernCreative/PaginatedResume";
-
 import CorporateMinimalResumeForm from "../templates/CorporateMinimal/ResumeForm";
 import CorporateMinimalPaginatedResume, {
   PaginatedResumeHandle as CorporatePaginatedResumeHandle,
@@ -76,6 +75,20 @@ function ResumeBuilderPage({
   useEffect(() => {
     setZoomInput(`${Math.round(zoom * 100)}%`);
   }, [zoom]);
+
+  // On mount: if mobile device, default zoom to 50% for better fit in preview
+  useEffect(() => {
+    const isMobile =
+      (typeof navigator !== "undefined" &&
+        /Mobi|Android|iPhone|iPad|iPod|Windows Phone/.test(
+          navigator.userAgent
+        )) ||
+      (typeof window !== "undefined" && window.innerWidth < 800);
+    if (isMobile) {
+      setZoom(0.5);
+      setZoomInput("50%");
+    }
+  }, []);
 
   const handleTriggerPhotoUpload = () => {
     photoFileInputRef.current?.click();
@@ -322,8 +335,16 @@ function ResumeBuilderPage({
         pdf.setFont("Lato", "normal");
       }
 
+      const isMobileDevice =
+        /Mobi|Android|iPhone|iPad|iPod|Windows Phone/.test(
+          navigator.userAgent
+        ) || window.innerWidth < 800;
+
+      let mobileUsedPdfHtml = false;
+
       for (let i = 0; i < pageElements.length; i++) {
         const pageElement = pageElements[i] as HTMLElement;
+
         const uploadButtons = pageElement.parentElement?.querySelectorAll(
           'button[aria-label^="Upload"]'
         );
@@ -331,34 +352,133 @@ function ResumeBuilderPage({
           (btn) => ((btn as HTMLElement).style.visibility = "hidden")
         );
 
-        if (i > 0) {
-          pdf.addPage();
+        if (!isMobileDevice) {
+          // Desktop / laptop: use jspdf.html for better text quality
+          if (i > 0) pdf.addPage();
+
+          try {
+            await pdf.html(pageElement, {
+              callback: (doc: any) => {},
+              x: 0,
+              y: 0,
+              width: 210,
+              windowWidth: 794,
+              html2canvas: {
+                scale: 0.26458,
+                useCORS: true,
+                logging: false,
+                letterRendering: false,
+                allowTaint: true,
+              },
+              autoPaging: false,
+            });
+          } catch (err) {
+            console.error("pdf.html error", err);
+            showDownloadError(
+              "Could not render page for PDF. Please try again."
+            );
+          } finally {
+            uploadButtons?.forEach(
+              (btn) => ((btn as HTMLElement).style.visibility = "visible")
+            );
+          }
+        } else {
+          // Mobile: attempt to use jspdf.html same as desktop for higher-quality
+          // vector/text output. If pdf.html fails on the device, fall back to
+          // the previous html2canvas snapshot approach.
+          try {
+            if (i > 0) pdf.addPage();
+
+            await pdf.html(pageElement, {
+              callback: (doc: any) => {},
+              x: 0,
+              y: 0,
+              width: 210,
+              windowWidth: 794,
+              html2canvas: {
+                scale: 0.26458,
+                useCORS: true,
+                logging: false,
+                letterRendering: false,
+                allowTaint: true,
+              },
+              autoPaging: false,
+            });
+            // successfully used jspdf.html on mobile
+            mobileUsedPdfHtml = true;
+          } catch (err) {
+            console.warn(
+              "pdf.html failed on mobile, falling back to html2canvas",
+              err
+            );
+
+            // Fallback: snapshot an offscreen A4 clone with html2canvas and insert as image
+            const clone = pageElement.cloneNode(true) as HTMLElement;
+            const uploadButtonsClone = clone.querySelectorAll(
+              'button[aria-label^="Upload"]'
+            );
+            uploadButtonsClone.forEach((btn) => {
+              (btn as HTMLElement).style.visibility = "hidden";
+            });
+
+            const A4_PX_WIDTH = 794;
+            const A4_PX_HEIGHT = 1122;
+
+            const offscreen = document.createElement("div");
+            offscreen.style.position = "absolute";
+            offscreen.style.left = "-9999px";
+            offscreen.style.top = "0";
+            offscreen.style.width = `${A4_PX_WIDTH}px`;
+            offscreen.style.height = `${A4_PX_HEIGHT}px`;
+            offscreen.style.overflow = "visible";
+            offscreen.appendChild(clone);
+            document.body.appendChild(offscreen);
+
+            try {
+              const canvas = await html2canvas(offscreen, {
+                scale: 2,
+                useCORS: true,
+                logging: false,
+                letterRendering: false,
+                allowTaint: true,
+                width: A4_PX_WIDTH,
+                height: A4_PX_HEIGHT,
+                windowWidth: A4_PX_WIDTH,
+                windowHeight: A4_PX_HEIGHT,
+              });
+
+              const imgData = canvas.toDataURL("image/png", 1.0);
+
+              if (i > 0) pdf.addPage();
+              pdf.addImage(imgData, "PNG", 0, 0, 210, 297);
+            } catch (err2) {
+              console.error("html2canvas fallback error", err2);
+              showDownloadError(
+                "Could not render page for PDF. Please try again."
+              );
+            } finally {
+              if (offscreen.parentElement) document.body.removeChild(offscreen);
+              uploadButtons?.forEach(
+                (btn) => ((btn as HTMLElement).style.visibility = "visible")
+              );
+            }
+          }
         }
-
-        await pdf.html(pageElement, {
-          callback: (doc: any) => {},
-          x: 0,
-          y: 0,
-          width: 210,
-          windowWidth: 794,
-          html2canvas: {
-            scale: 0.26458,
-            useCORS: true,
-            logging: false,
-            letterRendering: false,
-            allowTaint: true,
-          },
-          autoPaging: false,
-        });
-
-        uploadButtons?.forEach(
-          (btn) => ((btn as HTMLElement).style.visibility = "visible")
-        );
       }
 
       if (style) style.remove();
-      if (pdf.getNumberOfPages() > 1) {
-        pdf.deletePage(1);
+      // Delete the first page only when:
+      // - running on desktop (previous behavior), OR
+      // - running on mobile but we successfully used jspdf.html for rendering.
+      if (
+        (!isMobileDevice || (isMobileDevice && mobileUsedPdfHtml)) &&
+        pdf.getNumberOfPages() > 1
+      ) {
+        try {
+          pdf.deletePage(1);
+        } catch (err) {
+          console.warn("Could not delete first PDF page:", err);
+        }
       }
       pdf.save(
         `${resumeData.personalDetails.name.replace(/\s/g, "_")}_Resume.pdf`
