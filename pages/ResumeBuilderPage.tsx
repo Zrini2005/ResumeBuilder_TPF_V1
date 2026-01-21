@@ -85,8 +85,8 @@ function ResumeBuilderPage({
         )) ||
       (typeof window !== "undefined" && window.innerWidth < 800);
     if (isMobile) {
-      setZoom(0.5);
-      setZoomInput("50%");
+      setZoom(0.45);
+      setZoomInput("45%");
     }
   }, []);
 
@@ -99,7 +99,7 @@ function ResumeBuilderPage({
   };
 
   const handleSetNITTLogo = () => {
-    const NITT_LOGO_URL = "NITTLogo.png";
+    const NITT_LOGO_URL = "dist/images/NITTLogo.png";
     setResumeData((prev) => ({
       ...prev,
       personalDetails: { ...prev.personalDetails, logo: NITT_LOGO_URL },
@@ -205,14 +205,14 @@ function ResumeBuilderPage({
       let latoRegularBase64, latoBoldBase64, cambriaBase64;
 
       try {
-        latoRegularBase64 = await getFontBase64("Lato-Regular.ttf");
-        latoBoldBase64 = await getFontBase64("Lato-Bold.ttf");
+        latoRegularBase64 = await getFontBase64("/dist/fonts/Lato-Regular.ttf");
+        latoBoldBase64 = await getFontBase64("/dist/fonts/Lato-Bold.ttf");
       } catch (error) {
         console.error("Font loading error", error);
       }
 
       try {
-        cambriaBase64 = await getFontBase64("Cambria-Regular.ttf");
+        cambriaBase64 = await getFontBase64("/dist/fonts/Cambria-Regular.ttf");
       } catch (error) {
         console.error("Cambria font loading error", error);
       }
@@ -555,15 +555,15 @@ function ResumeBuilderPage({
       </aside>
 
       <main className="flex-1 p-4 sm:p-6 md:p-8 overflow-y-auto flex flex-col items-center">
-        <div className="mb-6 bg-white p-2 rounded-lg shadow-md flex items-center space-x-2 sticky top-0 z-10">
+        <div className="mb-4 bg-white p-1 sm:p-2 rounded-md sm:rounded-lg shadow-md flex items-center space-x-2 sticky top-0 z-10">
           <button
             onClick={onBack}
-            className="h-8 px-3 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm flex items-center justify-center space-x-1.5 mr-2"
+            className="h-7 sm:h-8 px-2 sm:px-3 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm flex items-center justify-center space-x-1.5 mr-2"
             title="Back"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
-              className="h-4 w-4"
+              className="h-3.5 w-3.5 sm:h-4 sm:w-4"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -580,19 +580,19 @@ function ResumeBuilderPage({
           <div className="h-8 w-px bg-gray-200 mx-2"></div>
           <button
             onClick={() => setZoom((prev) => Math.max(0.2, prev - 0.1))}
-            className="h-8 px-3 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 font-bold flex items-center justify-center"
+            className="h-7 sm:h-8 px-2 sm:px-3 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 font-bold flex items-center justify-center"
           >
             -
           </button>
           <button
             onClick={() => setZoom(1)}
-            className="h-8 px-3 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 text-sm flex items-center justify-center"
+            className="h-7 sm:h-8 px-2 sm:px-3 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 text-sm flex items-center justify-center"
           >
             Reset
           </button>
           <button
             onClick={() => setZoom((prev) => prev + 0.1)}
-            className="h-8 px-3 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 font-bold flex items-center justify-center"
+            className="h-7 sm:h-8 px-2 sm:px-3 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 font-bold flex items-center justify-center"
           >
             +
           </button>
@@ -602,7 +602,7 @@ function ResumeBuilderPage({
             onChange={handleZoomInputChange}
             onBlur={handleZoomInputBlur}
             onKeyDown={handleZoomInputKeyDown}
-            className="h-8 text-sm text-gray-600 w-16 text-center bg-gray-50 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+            className="h-7 sm:h-8 text-sm text-gray-600 w-14 sm:w-16 text-center bg-gray-50 border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
             aria-label="Zoom percentage"
           />
 
@@ -610,7 +610,7 @@ function ResumeBuilderPage({
             <div className="relative ml-2">
               <button
                 onClick={() => setIsColorPickerOpen(!isColorPickerOpen)}
-                className="w-8 h-8 rounded-full border-2 border-white shadow-sm focus:outline-none ring-1 ring-gray-300 transition-transform hover:scale-105"
+                className="w-7 h-7 sm:w-8 sm:h-8 rounded-full border-2 border-white shadow-sm focus:outline-none ring-1 ring-gray-300 transition-transform hover:scale-105"
                 style={{ backgroundColor: themeColor }}
                 title="Change Base Color"
                 aria-label="Change Color"
@@ -643,7 +643,7 @@ function ResumeBuilderPage({
           <button
             onClick={() => handleDownloadPdf()}
             disabled={isDownloading}
-            className={`h-8 px-3 text-white rounded text-sm flex items-center justify-center space-x-1.5 ml-2 transition-colors ${
+            className={`h-7 sm:h-8 px-2 sm:px-3 text-white rounded text-sm flex items-center justify-center space-x-1.5 ml-2 transition-colors ${
               isDownloading
                 ? "bg-green-400 cursor-wait"
                 : "bg-green-500 hover:bg-green-600"
@@ -651,7 +651,7 @@ function ResumeBuilderPage({
           >
             {isDownloading ? (
               <svg
-                className="animate-spin h-4 w-4 text-white"
+                className="animate-spin h-3.5 w-3.5 sm:h-4 sm:w-4 text-white"
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
                 viewBox="0 0 24 24"
@@ -673,7 +673,7 @@ function ResumeBuilderPage({
             ) : (
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                className="h-4 w-4"
+                className="h-3.5 w-3.5 sm:h-4 sm:w-4"
                 fill="none"
                 viewBox="0 0 24 24"
                 stroke="currentColor"
