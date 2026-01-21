@@ -170,7 +170,7 @@ const ResumeForm: React.FC<ResumeFormProps> = ({ resumeData, setResumeData, phot
   };
 
   const handleSetNITTLogo = () => {
-    const NITT_LOGO_URL = "/images/NITTLogo.png";
+    const NITT_LOGO_URL = "/ResumeBuilder_TPF_V1/images/NITTLogo.png";
     setResumeData(prev => ({
         ...prev,
         personalDetails: { ...prev.personalDetails, logo: NITT_LOGO_URL }
