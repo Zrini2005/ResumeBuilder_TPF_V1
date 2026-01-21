@@ -99,7 +99,7 @@ function ResumeBuilderPage({
   };
 
   const handleSetNITTLogo = () => {
-    const NITT_LOGO_URL = "NITTLogo.png";
+    const NITT_LOGO_URL = "dist/images/NITTLogo.png";
     setResumeData((prev) => ({
       ...prev,
       personalDetails: { ...prev.personalDetails, logo: NITT_LOGO_URL },
@@ -205,14 +205,14 @@ function ResumeBuilderPage({
       let latoRegularBase64, latoBoldBase64, cambriaBase64;
 
       try {
-        latoRegularBase64 = await getFontBase64("Lato-Regular.ttf");
-        latoBoldBase64 = await getFontBase64("Lato-Bold.ttf");
+        latoRegularBase64 = await getFontBase64("/dist/fonts/Lato-Regular.ttf");
+        latoBoldBase64 = await getFontBase64("/dist/fonts/Lato-Bold.ttf");
       } catch (error) {
         console.error("Font loading error", error);
       }
 
       try {
-        cambriaBase64 = await getFontBase64("Cambria-Regular.ttf");
+        cambriaBase64 = await getFontBase64("/dist/fonts/Cambria-Regular.ttf");
       } catch (error) {
         console.error("Cambria font loading error", error);
       }
